@@ -1,1 +1,2 @@
 vids/course2-1.mov filter=lfs diff=lfs merge=lfs -text
+vids/coures2-1.mov filter=lfs diff=lfs merge=lfs -text
