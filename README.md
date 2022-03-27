@@ -1,2 +1,2 @@
 # jw447.github.io
-personal web
+personal website
