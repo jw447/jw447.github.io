@@ -6,7 +6,7 @@ body {
     background-color:#d8d8d8;
 	font-size:110%;
 	margin:0;
-	font-family: Optima;
+	font-family: 'Optima';
 }
 
 .img1 {
@@ -15,7 +15,7 @@ body {
 }
 .content {
     background-color:white;
-	font-family:'Optimal';
+/*	font-family:'Optimal';*/
 	text-rendering:optimizeLegibility;
 	margin-left:auto;
 	margin-right:auto;
@@ -36,7 +36,7 @@ body {
 	border-right:solid 0px;
 	border-top:solid 0px;
 	max-width: 1000px;
-	font-family: Palatino Linotype;
+	font-family: 'Palatino Linotype';
 }
 
 @media screen and (min-width: 600px) {
