@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="robots" content="index,all">
 
-<title>Welcome to Jinzhen Wang's Homepage</title>
+<title>Jinzhen Wang - Home</title>
 
 <style type="text/css">
 @font-face { font-family:gfont; src:url('fonts/gfont-regular.ttf'); }
@@ -33,81 +33,108 @@
 .en-markup-crop-options div div:first-of-type {
     margin-left: 0px !important;
 }
+.row {
+  display: flex;
+}
+
 </style></head>
 
 <body>
 
-<div class="header">
-<nav class="site-navigation">
-<ul>
-        <li><a href="index.html">HOME</a></li>
-        <li><a href="cv.html">CV</a></li>
-        <li><a href="projects.html">PROJECTS</a></li>
-        <li><a href="publications.html">PUBLICATIONS</a></li>
-        <li><a href="teaching.html">TEACHING</a></li>
+<!-- <div class="header"> -->
+<!-- <nav class="site-navigation">
+<ul">
+    <li><a href="#home">HOME</a></li>
+    <li><a href="#paper">PUBLICATIONS</a></li>
+    <li><a href="#teach">TEACHING</a></li>
 </ul>
-</nav>
-</div>
-
-<!-- <div class="container"> -->
-
-<div class="img-with-text">
-    <img width="300" src="imgs/profile.png" align="right" alt="this is me">
-    <p width="300">
-        <a href=jw447@njit.edu> <i class="fa-light fa-envelope"></i> Email</a>
-        <a href="https://www.github.com/jw447"><i class="fab fa-github"></i> Github</a>
-        <a href="https://scholar.google.com/citations?user=VlALYkkAAAAJ&hl=en&authuser=1"><i class="ai ai-google-scholar-square ai-1x"></i> Google Scholar</a>
-        <a href="https://www.linkedin.com/in/jinzhen-wang-54b6b0a8/"><i class="fab fa-linkedin-square"></i> LinkedIn</a>
-    </p>
-</div>
+</nav> -->
 <!-- </div> -->
 
-<!-- <p>
-<img width="300" src="imgs/profile.png" align="right" alt="this is me">
-<h2>Jinzhen (Jon) Wang</h2>
-PhD candidate<br>
-Helen and John C. Hartmann<br>
-Department of Electrical and Computer Engineering<br>
-New Jersey Institute of Technology<br>
-University Heights,<br>
-Newark, NJ 07102<br>
-<br>
-Email: jw447@njit.edu<br>
-<a href=jw447@njit.edu> <i class="fa-light fa-envelope"></i> Email</a>
-<a href="https://www.github.com/jw447"><i class="fab fa-github"> Github</i></a>
-<a href="https://scholar.google.com/citations?user=VlALYkkAAAAJ&hl=en&authuser=1"><i class="ai ai-google-scholar-square ai-1x"></i> Google Scholar</a>
-<a href="https://www.linkedin.com/in/jinzhen-wang-54b6b0a8/"><i class="fab fa-linkedin-square"></i></a>
-</p> -->
+<div class="content">
 
-<hr>
 
-<h3>Short Bio</h3>
-<p> I'm a PhD candidate of Electrical Engineering at New Jersey Institute of Technology. I'm working with <a href="https://web.njit.edu/~qliu/">Dr. Qing Liu</a> from ECE Department. My research interests include High Performance Computing, Cloud Computing and Machine Learning. I'm interested in the interaction between machine learning and systems. I'm excited to bring the power of state-of-art HPC hardware and architecture to machine learning. I'm also generally interested in AI, robotics and other technologies that will bring fundamental changes to the society and people's lives.</p>
+<div class="row">
+    <div class="text" >
+        <h1 id="home" style="font-family:'Optima'">Jinzhen Jon Wang</h1>
+        <a style="color:#0571b0"> <i class="fa fa-envelope-o"></i> jw447 [at] njit [dot] edu</a>
+        <a style="color:#0571b0" href="https://www.github.com/jw447"><i class="fab fa-github"></i> Github</a>
+        <a style="color:#0571b0" href="https://scholar.google.com/citations?user=VlALYkkAAAAJ&hl=en&authuser=1"><i class="ai ai-google-scholar-square ai-1x"></i> Scholar</a>
+        <a style="color:#0571b0" href="https://www.linkedin.com/in/jinzhen-wang-54b6b0a8/"><i class="fab fa-linkedin-square"></i> LinkedIn</a>
+        <p> I'm a PhD candidate from the Department of Electrical and Computer Engineering at New Jersey Institute of Technology, advised by <a style="color:#0571b0" href="https://web.njit.edu/~qliu/">Professor Qing Liu</a>. My research interests include High Performance Computing, with the focus on Lossy Compression, Scientific Data management and Machine Learning. 
+        </p>
 
-<hr>
+        <p> I received my M.S. degree in Electrical Engineering at New Jersey Institute of Technology in 2017 and B.S. degree in the Internet of Things engineering at Shandong University in 2015.
+        </p>
+        <!-- I'm interested in the interaction between machine learning and systems. I'm excited to bring the power of state-of-art HPC hardware and architecture to machine learning. I'm also generally interested in AI, robotics and other technologies that will bring fundamental changes to the society and people's lives.</p> -->
+    </div>
+    <div class="img-with-text" align="right">
+        <br>
+        <img width="350" src="imgs/profile.jpg">
+    </div>
+</div>
+
 
 <h3>Recent News</h3>
 <ul>
-    <li>[Apr 2019] I passed my dissertation proposal.</li>
+    <li>[Feb 2023] Our paper titled "Improving Progressive Retrieval for HPC Scientific Data using Deep Neural Network" has been accepted for publication at the IEEE International Conference on Data Engineering (ICDE 2023)! </li>
+
+    <li> [May 2022] I will be joining Los Alamos National Laboratory as a summer intern. </li>
+
+    <li>[Apr 2019] I passed my dissertation proposal!</li>
     <li>[Jan 2019] I will teach ECE394 - Digital Systems Lab. Checkout the Teaching section for more details.</li>
     <li>[Nov 2018] I passed my QE and became a PhD candidate.</li>
     <li>[Aug 2018] I will teach ECE394 - Digital Systems Lab. Checkout the Teaching section for more details.</li>
     <li>[Jan 2018] I joined the PhD program of Electrical Engineering in the Fall of 2017.</li>
 </ul>
 
-<!-- <hr> -->
-<!-- <h3>Awards & Honors</h3> -->
+<hr>
+
+<h3 id="paper">Selected publications</h3>
+<ul>
+    <li>Compression Ratio Modeling and Estimation Across Error Bounds for Lossy Compression<br>
+    <b>J. Wang</b>, T. Liu, Q. Liu, X. He, H. Luo, W. He<br>
+        IEEE Transaction on Parallel and Distributed Systems, under revision</li>
+    <li>SIRIUS: Enabling Progressive Data Exploration for Extreme-Scale Scientific Data<br>
+    Z. Qiao, T. Lu, H. Luo, Q. Liu, S. Klasky, N. Podhorszki, <b>J. Wang</b><br>
+        IEEE Transactions on Multi-Scale Computing Systems (Volume: 4, Issue: 4, Oct.-Dec. 1 2018)</li>
+    <li>DuoModel: Leveraging Reduced Model for Data Reduction and Re-Computation on HPC Storage<br>
+    H. Luo, Q. Liu, Z. Qiao, <b>J. Wang</b>, M. Wang, H. Jiang<br>
+        IEEE Letters of the Computer Society (Volume: 1, Issue: 1, Jan.-June 1 2018)</li>
+</ul>
 
 <hr>
 
-<h3>Organizations</h3>
-<p>
-<img width="120" src="imgs/njit.png" align="left" alt="njit logo" >
-<br>
-<br>
-<br>
-<br>
+<h3>Work experience</h3>
+<ul>
+    <li>Sep 2022 - present: Graduate research intern</li>
+    <ul>
+        <li>Los Alamos National Laboratory</li>
+    </ul>
+    <li> May 2022 - Aug 2022: Summer intern</li>
+    <ul>
+        <li>Los Alamos National Laboratory</li>
+    </ul>
+</ul>
+
+<hr>
+
+<h3 id="teach">Teaching experience</h3>
+<h3>Spring 2019</h3>
+<p><b>ECE394 Digital Systems Lab</b><br>
+Schedule: Wednesday 6:00 - 8:50pm, Jan 22nd - May 16th;<br>
+    - Venue: LSEC 302A<br>
+Office hour: Wednesday 5:00 - 6:00pm, Jan 22nd - May 16th;<br>
+    - Venue: FMH 105
+</p>
+
+<h3>Fall 2018</h3>
+<p><b>ECE394 Digital Systems Lab</b><br>
+Schedule: Monday 1:00 - 3:50pm, Sep 04th - Dec 10th;<br>
+    - Venue: LSEC 302B<br>
+Office hour: Monday 4:00 - 5:00pm, Sep 04th - Dec 10th;<br>
+    - Venue: FMH 105
 </p>
 
 
-</div></div></body></html>
+</div></body></html>
