@@ -25,28 +25,58 @@
 
 <body>
 
-<!-- <div class="header"> -->
-<!-- <nav class="site-navigation">
-<ul">
-    <li><a href="#home">HOME</a></li>
-    <li><a href="#paper">PUBLICATIONS</a></li>
-    <li><a href="#teach">TEACHING</a></li>
-</ul>
-</nav> -->
-<!-- </div> -->
+<button onclick="topFunction()" id="myBtn" title="Go to top">Top</button>
 
-<!---->
+<script>
+// Get the button
+let mybutton = document.getElementById("myBtn");
+
+// When the user scrolls down 20px from the top of the document, show the button
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    mybutton.style.display = "block";
+  } else {
+    mybutton.style.display = "none";
+  }
+}
+
+// When the user clicks on the button, scroll to the top of the document
+function topFunction() {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+}
+</script>
+
+<div class="header">
+<nav class="site-navigation">
+<ul>
+    <li><a style="color:#878487" href="#home">Home</a></li>
+    <li><a style="color:#878487" href="#news">News</a></li>
+    <li><a style="color:#878487" href="#paper">Publications</a></li>
+    <li><a style="color:#878487" href="#work">Experience</a></li>
+    <li><a style="color:#878487" href="#teach">Teaching</a></li>
+    <li><a style="color:#878487" href="#award">Award</a></li>
+    <!-- <li><a style="color:#878487" href="#meet">Meet</a></li> -->
+</ul>
+</nav>
+<hr>
+</div>
 
 <div class="content">
 
-<h1 id="home" style="font-family:'Optima'">Jinzhen Wang</h1>
-
+<!-- <h2 id="home" style="font-family:'Palatino Linotype'">Jinzhen Wang</h2> -->
+<!-- <img width="250" src="imgs/signature_black.png"> -->
 <div class="row">
     <div class="text" >
-        
-        <a style="color:#0571b0" href="https://scholar.google.com/citations?user=VlALYkkAAAAJ"><i class="ai ai-google-scholar-square ai-1x"></i> Scholar</a>
-        &nbsp;
+      <div class="img-with-text" align="left">
+        <img width="250" src="imgs/signature_black.png">
+      </div>
         <a style="color:#0571b0"> <i class="fa fa-envelope"></i> jw447 [at] njit [dot] edu</a>
+        &nbsp;
+        <a style="color:#0571b0" href="https://scholar.google.com/citations?user=VlALYkkAAAAJ"><i class="ai ai-google-scholar-square ai-1x"></i> Scholar</a>
+        
         <p> I'm a PhD candidate from the Department of Electrical and Computer Engineering at <a style="color:#0571b0" href="https://njit.edu/"> New Jersey Institute of Technology</a>, advised by <a style="color:#0571b0" href="https://web.njit.edu/~qliu/">Professor Qing Liu</a>. My research targets <strong>High Performance Computing</strong>, with the focus on <strong>Lossy Compression</strong>, <strong>Scientific Data management</strong> and <strong>Machine Learning</strong>. I received my M.S. degree in Electrical Engineering at New Jersey Institute of Technology in 2017 and B.S. degree in the Internet of Things engineering at Shandong University in 2015.
         </p>
         <p> My most recent CV can be found <a style="color:#0571b0" href="./files/JinzhenWang_CV.pdf"> HERE </a> (updated on 02/2023).</p>
@@ -134,5 +164,16 @@ IEEE Transactions on Parallel and Distributed Systems, 2019<p>
 
 &#10018; ICDE'23 student travel awards<br>
 
+<hr>
+
+<h3 id="meet">Meet with me</h3>
+<iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FNew_York&showTitle=0&src=anc0NDdAbmppdC5lZHU&color=%2333ae06" style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+
+<!-- <form>
+ <input type="BUTTON" value="Back to top of page" onclick="window.location.href='#top'">
+</form> -->
+
 </div>
+
+
 </body></html>
