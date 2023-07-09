@@ -25,6 +25,8 @@ body {
 	font-size:100%;
 	margin:0;
 	font-family: 'Optima';
+    /*background-color: var(--bg);
+    color: var(--text);*/
 }
 
 div {
@@ -149,4 +151,16 @@ p {
   background-color: #a8a8a8;
 }
 
+/*@import url("https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap");
 
+:root {
+  --text: #000;
+  --bg: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #fff;
+    --bg: #000;
+  }
+}*/
