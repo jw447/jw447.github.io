@@ -15,23 +15,25 @@ en-markup-crop-options div div:first-of-type {
     margin-left: 0px !important;
 }
 
-.row {
-  display: flex;
-  gap: 80px;
-}
 
 body {
     background-color:#d8d8d8;
 	font-size:100%;
 	margin:0;
 	font-family: 'Optima';
-    /*background-color: var(--bg);
-    color: var(--text);*/
 }
 
 div {
   text-align: justify;
   text-justify: inter-word;
+}
+
+#responsive {
+    display: inline-block;
+    gap: 80px;
+    position: relative;
+    width: 100%;
+    background-color: white;
 }
 
 .img1 {
