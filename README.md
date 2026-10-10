@@ -71,3 +71,5 @@ The UNC Charlotte sponsor uses the supplied horizontal logo. All sponsor artwork
 The header displays only the official CCI logo, left aligned; navigation and theme controls remain right aligned. The horizontal UNC Charlotte logo remains in Sponsors.
 
 The current lab directory uses matching responsive columns without profile dividers. Aagat Pokhrel is included under Students; Adelina Zheng is an Alumni summer REU student from Brown University. No additional degree or date is inferred. The Join section is removed. Lab overview text remains editable in `content/lab.json` under `mission`. Homepage and lab browser titles use the owner-requested names; the CCI header logo has no extra inset padding.
+
+Sponsor alignment uses three equal-width columns, each with a centered 240×96px image box. Preserve this even distribution and equal image dimensions; do not restore a flex group aligned to one side. On phones, use evenly centered rows with the same image-box size.

@@ -19,4 +19,6 @@ listed at the owner's request, without invented award names or funding amounts.
 
 Downloaded October 10, 2026. These originals are displayed without recoloring or cropping, on a white background in both themes.
 
-The owner selected `charlotte-horizontal.png` for the UNC Charlotte sponsor. The header displays only `cci.png`. Sponsor images use a shared CSS height and natural widths rather than fixed equal-width image boxes.
+The owner selected `charlotte-horizontal.png` for the UNC Charlotte sponsor. The header displays only `cci.png`. Sponsor images use identical 240×96px boxes, centered in three equal-width columns. Artwork retains its natural proportions; narrow screens use centered single-column rows.
+
+Sponsor alignment uses three equal-width columns, each with a centered 240×96px image box. Preserve this even distribution and equal image dimensions; do not restore a flex group aligned to one side. On phones, use evenly centered rows with the same image-box size.

@@ -1,9 +1,9 @@
 /* Sponsor artwork uses its original transparency; no cards or captions. */
-.sponsor-grid{display:flex;flex-wrap:wrap;gap:24px 40px;align-items:center}
-.sponsor-logo-panel{display:flex;align-items:center;justify-content:center;height:80px;max-width:100%;padding:0;background:transparent;margin:0}
-.sponsor-logo-panel img{display:block;width:auto;max-width:100%;height:64px;object-fit:contain;object-position:center}
+.sponsor-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:center;width:100%}
+.sponsor-logo-panel{display:flex;align-items:center;justify-content:center;width:100%;min-width:0;height:112px;padding:0;background:transparent;margin:0}
+.sponsor-logo-panel img{display:block;width:240px;max-width:100%;height:96px;object-fit:contain;object-position:center}
 .sponsor-logo-panel:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
-@media(max-width:640px){.sponsor-grid{gap:16px 24px}.sponsor-logo-panel{height:68px}.sponsor-logo-panel img{height:52px}}
+@media(max-width:640px){.sponsor-grid{grid-template-columns:1fr;gap:16px}}
 .news-scroll{max-height:20rem;overflow-y:auto;overscroll-behavior:contain;padding-right:12px;scrollbar-color:var(--muted) var(--paper)}
 .news-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
 @media print{.news-scroll{max-height:none;overflow:visible}}
