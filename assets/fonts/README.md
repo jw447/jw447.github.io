@@ -1,0 +1,18 @@
+# Bundled font sources
+
+These font files are self-hosted. Visitors make no requests to a third-party font provider.
+
+- Inter: `google/fonts`, `ofl/inter/Inter[opsz,wght].ttf`, converted losslessly to WOFF.
+- Source Sans 3: `google/fonts`, `ofl/sourcesans3/SourceSans3[wght].ttf`, converted losslessly to WOFF.
+- IBM Plex Sans: `google/fonts`, `ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf`, converted losslessly to WOFF.
+- Source Serif 4: `adobe-fonts/source-serif`, `WOFF2/VAR/SourceSerif4Variable-Roman.ttf.woff2`, retained as supplied.
+
+Retrieved October 9, 2026. No glyphs were removed. Original names and copyright metadata are preserved. The corresponding SIL Open Font License texts are included in this directory.
+
+Official project references: https://rsms.me/inter/ , https://github.com/adobe-fonts/source-sans , https://github.com/IBM/plex , https://github.com/adobe-fonts/source-serif .
+
+## Chinese name fallback
+
+`hpdi-name-kai.woff` is a web-only subset of LXGW WenKai Regular containing 王金震 (U+738B, U+91D1, U+9707). Source: https://github.com/lxgw/LxgwWenKai/blob/main/fonts/TTF/LXGWWenKai-Regular.ttf . Downloaded October 9, 2026 (America/New_York); converted and subsetted with FontTools without changing glyph outlines. Original family, copyright, and name records are retained. The accompanying `LXGWWenKai-OFL.txt` includes explicit permission for retaining reserved names in web-delivery subsets. Do not distribute this subset as an installable desktop font.
+
+Source TTF SHA-256: `39ad71264b588165b469e35e6afb162a378dacd1f95348160240ba9038ac3009`.

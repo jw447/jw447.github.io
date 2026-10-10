@@ -1,1 +1,8 @@
+__pycache__/
+*.pyc
 .DS_Store
+.editor-state/
+*.json.editor-tmp
+
+# Generated output is rebuilt by GitHub Actions.
+dist/

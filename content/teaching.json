@@ -1,0 +1,6 @@
+[
+ {"code":"ITCS 6145 / 8145", "title":"Parallel Computing", "institution":"UNC Charlotte", "terms":"Fall 2024, Spring 2025", "description":"Parallel algorithms and programming on multicore, GPU, and distributed systems."},
+ {"code":"CISC 3310", "title":"Principles of Computer Architecture", "institution":"Brooklyn College, CUNY", "terms":"Spring 2024"},
+ {"code":"CISC 1050", "title":"Introduction to Computer Applications", "institution":"Brooklyn College, CUNY", "terms":"Fall 2023, Spring 2024"},
+ {"code":"ECE 394", "title":"Digital Systems Laboratory", "institution":"New Jersey Institute of Technology", "terms":"Fall 2018, Spring 2019"}
+]

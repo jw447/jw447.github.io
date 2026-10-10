@@ -1,0 +1,42 @@
+/* Shared, bounded design controls. Loaded after each layout's stylesheet. */
+@font-face{font-family:'Source Sans 3';src:url('fonts/sourcesans3.woff') format('woff');font-weight:200 900;font-display:swap}
+@font-face{font-family:Inter;src:url('fonts/inter.woff') format('woff');font-weight:100 900;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('fonts/ibmplexsans.woff') format('woff');font-weight:100 700;font-display:swap}
+@font-face{font-family:'Source Serif 4';src:url('fonts/sourceserif4.woff2') format('woff2');font-weight:200 900;font-display:swap}
+:root{--measure:var(--d-page-width)}
+body{font-family:var(--d-body-font)!important;font-size:var(--d-body-size)!important;line-height:var(--d-line-height)!important}
+body .wrap,body .page-shell,body .header-inner,body .site-footer{max-width:var(--d-page-width)!important}
+body .lab-shell main{max-width:none}
+body .prose,body .compact-bio,body .lab-mission,body .lede,body main>p{max-width:none}
+body main p,body .bio p,body main li,body main time{line-height:var(--d-line-height)!important}
+body p{margin-bottom:var(--d-paragraph-gap)}
+body main p,body main li,body main time,body nav a,body .paper-links,body .paper-links a,body .citation summary,body .citation pre,body .copy-citation,body .profile-button,body .contact-chip,body .contact-chips a,body .contact-chips span,body .resource-buttons a,body .venue,body .paper-venue,body .profile-links,body .contact,body .affiliation,body .role,body .identity span,body .theme-toggle,body .menu-toggle,body .site-footer,body .site-footer p,body .site-footer address{font-size:var(--d-body-size)!important}
+body .paper-venue{overflow-wrap:anywhere}
+body .paper,body .pub{grid-template-columns:calc(var(--d-body-size)*6.6) minmax(0,1fr)}
+body .news-item,body .news li{grid-template-columns:calc(var(--d-body-size)*5.6) minmax(0,1fr)}
+body main span,body main small,body main label,body main input,body main select,body main button,body main figcaption{font-size:var(--d-body-size)!important}
+body main h1,body .lab-hero h1{font-family:var(--d-heading-font)!important;font-size:var(--d-heading-size)!important}
+body main h2,body .section-heading h2{font-family:var(--d-heading-font)!important;font-size:var(--d-section-size)!important}
+body main h3,body main h4{font-family:var(--d-heading-font)!important;font-size:max(var(--d-body-size),18px)!important}
+body .paper h3{font-size:var(--d-body-size)!important}
+body .chinese-name{font-size:var(--d-chinese-size)!important}
+body nav,body nav a,body .identity,body .brand,body .profile-button,body .resource-buttons{font-family:var(--d-nav-font)!important}
+body .section{margin-top:var(--d-section-gap);padding-top:calc(var(--d-section-gap)*.65)}
+body main.wrap>section+section{margin-top:var(--d-section-gap)}
+body main.wrap>section>h2{margin-top:0}
+body .paper{margin-bottom:var(--d-publication-gap)}
+body .pub{padding-block:calc(var(--d-publication-gap)/2)}
+body .news-scroll{max-height:var(--d-news-height)}
+body .portrait,body .home-profile .portrait{width:var(--d-portrait-size);height:var(--d-portrait-size);object-fit:cover}
+body .home-profile,body .intro{grid-template-columns:var(--d-portrait-size) minmax(0,1fr)}
+body .intro-columns{grid-template-columns:minmax(0,1fr) var(--d-portrait-size)}
+html[data-portrait="left"] .intro-columns{grid-template-columns:var(--d-portrait-size) minmax(0,1fr)}
+html[data-portrait="left"] .intro-columns>.portrait{grid-column:1;grid-row:1}
+html[data-portrait="left"] .intro-columns>div{grid-column:2;grid-row:1}
+html[data-portrait="right"] .home-profile,html[data-portrait="right"] .intro{grid-template-columns:minmax(0,1fr) var(--d-portrait-size)}
+html[data-portrait="right"] .home-profile>.portrait,html[data-portrait="right"] .intro>.portrait{grid-column:2;grid-row:1}
+html[data-portrait="right"] .home-profile>div,html[data-portrait="right"] .intro>div{grid-column:1;grid-row:1}
+@media(min-width:701px){html[data-portrait="left"] body[data-design="editorial"] .page-shell:not(.lab-shell){grid-template-columns:var(--d-portrait-size) minmax(0,1fr);gap:40px}html[data-portrait="left"] body[data-design="editorial"] .profile{grid-column:1;border-left:0;padding-left:0}html[data-portrait="left"] body[data-design="editorial"] main{grid-column:2}html[data-portrait="right"] body[data-design="editorial"] .page-shell:not(.lab-shell){grid-template-columns:minmax(0,1fr) var(--d-portrait-size);gap:40px}}
+@media(max-width:700px){body main h1,body .lab-hero h1{font-size:clamp(32px,6vw,var(--d-heading-size))!important}body .portrait,body .home-profile .portrait{width:min(var(--d-portrait-size),120px);height:min(var(--d-portrait-size),120px)}body .home-profile,body .intro,body .intro-columns,html[data-portrait] .home-profile,html[data-portrait] .intro,html[data-portrait] .intro-columns{grid-template-columns:1fr}html[data-portrait] .portrait{grid-column:1!important;grid-row:1!important}html[data-portrait] .home-profile>div,html[data-portrait] .intro>div,html[data-portrait] .intro-columns>div{grid-column:1;grid-row:2}body .home-profile{gap:18px}}
+@media(max-width:700px){body .paper,body .pub,body .news-item,body .news li{grid-template-columns:1fr}}
+@media print{body .news-scroll{max-height:none;overflow:visible}body .portrait{width:120px;height:120px}}

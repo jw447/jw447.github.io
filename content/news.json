@@ -1,0 +1,20 @@
+[
+ {"date":"2026-08", "kind":"Funding", "text":"Our NAIRR Pilot project has been funded.", "url":"https://submit-nairr.xras.org/"},
+ {"date":"2026-07", "kind":"Funding", "text":"Our team was selected for a DOE Genesis Mission Phase I award.", "url":"https://inside.charlotte.edu/2026/07/27/unc-charlotte-projects-join-the-department-of-energy-genesis-mission-and-student-ai-fellows-put-large-language-models-to-work/"},
+ {"date":"2026-07", "kind":"Paper", "text":"DeepCQ has been accepted at IEEE Cluster 2026. Congratulations to Khondoker Mirazul Mumenin and our collaborators!", "url":"https://arxiv.org/abs/2512.21433"},
+ {"date":"2026-01", "kind":"Funding", "text":"Our NAIRR Classroom project has been funded.", "url":"https://submit-nairr.xras.org/"},
+ {"date":"2025-08", "kind":"Paper", "text":"Rethinking the Potential of Layer Freezing for Efficient DNN Training is available on arXiv."},
+ {"date":"2025-06", "kind":"Paper", "text":"NeurLZ has been accepted at ICS 2025.", "url":"https://arxiv.org/abs/2409.05785"},
+ {"date":"2024-12", "kind":"Service", "text":"NRDPISI-2 workshop call for papers announced."},
+ {"date":"2024-11", "kind":"Service", "text":"Serving on the technical program committee of ICDE 2025."},
+ {"date":"2024-10", "kind":"Paper", "text":"QualityNet has been accepted at IEEE BigData 2024. Congratulations to Khondoker Mirazul Mumenin and our collaborators!"},
+ {"date":"2024-06", "kind":"Service", "text":"Organizing NRDPISI-1 in conjunction with eScience 2024."},
+ {"date":"2024-04", "kind":"Career", "text":"Joining UNC Charlotte as a tenure-track Assistant Professor."},
+ {"date":"2023-09", "kind":"Service", "text":"Serving on the technical program committees of SDM 2024 and CCGrid 2024."},
+ {"date":"2023-03", "kind":"Paper", "text":"zPerf has been accepted by IEEE Transactions on Computers."},
+ {"date":"2023-02", "kind":"Paper", "text":"Improving Progressive Retrieval for HPC Scientific Data using Deep Neural Network has been accepted at ICDE 2023."},
+ {"date":"2022-09", "kind":"Paper", "text":"Our study of lossy data reduction and cosmology volume rendering has been accepted at DRBSD-8."},
+ {"date":"2022-05", "kind":"Career", "text":"Joining Los Alamos National Laboratory as a summer research intern."},
+ {"date":"2019-08", "kind":"Paper", "text":"Compression ratio modeling and estimation across error bounds for lossy compression has been accepted by IEEE TPDS."},
+ {"date":"2019-05", "kind":"Talk", "text":"Presenting our work at IPDPS 2019."}
+]

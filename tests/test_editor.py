@@ -1,0 +1,155 @@
+"""Exercise real builds, revision protection, loopback API and isolated Git publishing."""
+import copy
+from http.client import HTTPConnection
+from http.server import ThreadingHTTPServer
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import threading
+import unittest
+from unittest.mock import patch
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from editor.content import bundle, read_content, validate
+from scripts.editor_server import Editor, EditorError, make_handler
+from editor.design import validate_design
+
+
+class EditorTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name) / 'site'
+        shutil.copytree(ROOT, self.root, ignore=shutil.ignore_patterns('.git', '.openai', '__pycache__', '.editor-state'))
+        self.editor = Editor(self.root)
+
+    def tearDown(self):
+        if self.editor.preview: self.editor.preview.cleanup()
+        self.temp.cleanup()
+
+    def draft(self):
+        data = bundle(self.root)
+        data['content']['news'].insert(0, dict(date='2026-10', kind='Update', text='Editor integration test announcement.', url=''))
+        return data
+
+    def test_preview_does_not_save_and_save_rebuilds_with_backup(self):
+        before = read_content(self.root)
+        draft = self.draft()
+        self.editor.preview_content(draft)
+        preview = Path(self.editor.preview.name) / 'dist/compact/index.html'
+        self.assertIn('Editor integration test announcement.', preview.read_text())
+        self.assertEqual(read_content(self.root), before)
+        saved = self.editor.save(draft)
+        self.assertEqual(saved['changed'], ['news'])
+        self.assertIn('Editor integration test announcement.', (self.root / 'dist/compact/index.html').read_text())
+        backups = list((self.root / '.editor-state/backups').glob('*/news.json'))
+        self.assertEqual(json.loads(backups[0].read_text()), before['news'])
+        with self.assertRaises(EditorError) as error: self.editor.save(draft)
+        self.assertEqual(error.exception.status, 409)
+
+    def test_bad_input_and_build_failure_leave_content_unchanged(self):
+        before = read_content(self.root)
+        draft = self.draft()
+        draft['content']['news'][0]['url'] = 'javascript:alert(1)'
+        with self.assertRaises(EditorError): self.editor.save(draft)
+        draft = self.draft()
+        with patch.object(self.editor, 'build_preview', side_effect=EditorError('failed build')):
+            with self.assertRaises(EditorError): self.editor.save(draft)
+        self.assertEqual(read_content(self.root), before)
+        bad = copy.deepcopy(before)
+        bad['publications'][1]['id'] = bad['publications'][0]['id']
+        bad['profile']['name'] = ' '
+        self.assertGreaterEqual(len(validate(bad, before)), 2)
+
+    def test_design_save_rebuilds_all_layouts_and_keeps_content(self):
+        before = read_content(self.root)
+        draft = bundle(self.root)
+        design = draft['content']['design']
+        design['typography']['body_size'] = 18
+        design['layout'].update(page_width=1200, news_height=440, portrait_position='right')
+        self.assertEqual(validate_design(design), [])
+        saved = self.editor.save(json.loads(json.dumps(draft)))
+        self.assertEqual(saved['changed'], ['design'])
+        self.assertEqual(read_content(self.root)['news'], before['news'])
+        css = (self.root / 'dist/assets/design-tokens.css').read_text()
+        self.assertIn('--d-body-size:18px;', css)
+        self.assertIn('--d-page-width:1200px;', css)
+        self.assertIn('--d-news-height:440px;', css)
+        for layout in ('', 'compact', 'simple', 'editorial'):
+            for page in ('index.html', 'lab.html'):
+                html = (self.root / 'dist' / layout / page).read_text()
+                self.assertIn('data-portrait="right"', html)
+                self.assertIn('design-tokens.css', html)
+                self.assertIn('design.css', html)
+        bad = bundle(self.root)
+        bad['content']['design']['dark']['ink'] = '#1B1B1B'
+        with self.assertRaises(EditorError): self.editor.save(bad)
+        self.assertEqual(read_content(self.root)['design'], design)
+
+    def test_loopback_http_blocks_cross_origin_and_traversal(self):
+        server = ThreadingHTTPServer(('127.0.0.1', 0), make_handler(self.editor))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        origin = f'http://127.0.0.1:{server.server_port}'
+        def request(method, path, headers=None, body=None):
+            conn = HTTPConnection('127.0.0.1', server.server_port)
+            conn.request(method, path, body=body, headers=headers or {})
+            response = conn.getresponse()
+            status, raw = response.status, response.read()
+            conn.close()
+            return status, raw
+        try:
+            status, raw = request('GET', '/api/status')
+            self.assertEqual(status, 200)
+            token = json.loads(raw)['token']
+            self.assertEqual(request('GET', '/api/status', {'Host': 'malicious.example'})[0], 403)
+            self.assertEqual(request('GET', '/%2e%2e/content/profile.json')[0], 404)
+            self.assertEqual(request('GET', '/.git/config')[0], 404)
+            body = json.dumps(self.draft())
+            headers = {'Content-Type': 'application/json', 'Origin': 'https://malicious.example', 'X-Editor-Token': token}
+            self.assertEqual(request('POST', '/api/save', headers, body)[0], 403)
+            headers['Origin'] = origin
+            headers['X-Editor-Token'] = 'wrong'
+            self.assertEqual(request('POST', '/api/save', headers, body)[0], 403)
+            headers['X-Editor-Token'] = token
+            self.assertEqual(request('POST', '/api/preview', headers, body)[0], 200)
+            self.assertEqual(request('GET', '/preview/compact/index.html')[0], 200)
+            large = dict(headers, **{'Content-Length': '1000001'})
+            self.assertEqual(request('POST', '/api/save', large, b'{}')[0], 413)
+            self.assertNotIn('Editor integration test announcement.', (self.root / 'content/news.json').read_text())
+        finally:
+            server.shutdown(); server.server_close(); thread.join()
+
+    def test_publish_retry_pushes_existing_commit_and_excludes_code_edits(self):
+        # Local bare fixture only: no real GitHub repository is written.
+        remote = Path(self.temp.name) / 'remote.git'
+        subprocess.run(['git', 'init', '--bare', str(remote)], check=True, capture_output=True)
+        def git(*args):
+            return subprocess.run(['git', '-C', str(self.root), *args], check=True, capture_output=True, text=True).stdout.strip()
+        git('init', '-b', 'main'); git('config', 'user.name', 'Editor Test'); git('config', 'user.email', 'test@example.org')
+        git('add', '.'); git('commit', '-m', 'Initial test source'); git('remote', 'add', 'origin', str(remote)); git('push', '-u', 'origin', 'main')
+        with patch.object(self.editor, 'github_remote', return_value=True):
+            (self.root / 'assets/style.css').write_text('changed layout')
+            with self.assertRaises(EditorError): self.editor.publish(self.draft())
+            git('restore', 'assets/style.css')
+            original_git = self.editor.git
+            def fail_push(*args, **kwargs):
+                if args[0] == 'push': raise EditorError('Simulated network failure', 409)
+                return original_git(*args, **kwargs)
+            with patch.object(self.editor, 'git', side_effect=fail_push):
+                with self.assertRaises(EditorError) as error: self.editor.publish(self.draft())
+            self.assertTrue(error.exception.extra['committed'])
+            commit = git('rev-parse', 'HEAD')
+            retry = self.editor.publish(bundle(self.root))
+            self.assertEqual(retry['commit'], commit)
+            self.assertEqual(git('rev-parse', 'origin/main'), commit)
+            self.assertFalse(self.editor.pending_path.exists())
+            unchanged = self.editor.publish(bundle(self.root))
+            self.assertEqual(unchanged['message'], 'No content changes to publish.')
+            self.assertEqual(git('rev-parse', 'HEAD'), commit)
+
+
+if __name__ == '__main__': unittest.main()

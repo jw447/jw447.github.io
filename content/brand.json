@@ -1,0 +1,23 @@
+{
+  "name": "UNC Charlotte",
+  "source": "https://brand.charlotte.edu/visual-identity/color-palette/",
+  "verified": "2026-10-09",
+  "colors": {
+    "accent": "#005035",
+    "gold": "#A49665",
+    "paper": "#FFFFFF",
+    "ink": "#252B2A",
+    "muted": "#626D68",
+    "line": "#DCE2DE",
+    "accent-soft": "#EEF4F1"
+  },
+  "dark_colors": {
+    "accent": "#8FB9A0",
+    "gold": "#C3B387",
+    "paper": "#1B1B1B",
+    "ink": "#E8E4DC",
+    "muted": "#B2AEA6",
+    "line": "#3B3B3B",
+    "accent-soft": "#262626"
+  }
+}

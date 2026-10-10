@@ -1,0 +1,90 @@
+{
+  "mission": "We study efficient methods for managing scientific data on high-performance computing systems, with a focus on data reduction, compression, and parallel and distributed systems.",
+  "research": [
+    {
+      "title": "Data reduction & compression",
+      "description": "Compression quality prediction and configuration selection for scientific datasets."
+    },
+    {
+      "title": "Scientific data management",
+      "description": "Progressive retrieval and efficient access to large scientific datasets."
+    },
+    {
+      "title": "Parallel & distributed systems",
+      "description": "Performance modeling and data movement across modern computing and storage systems."
+    }
+  ],
+  "recruiting": "We welcome inquiries from students interested in high-performance computing and scientific data management.",
+  "navigation": [
+    {
+      "label": "Overview",
+      "kind": "local",
+      "target": "lab-overview"
+    },
+    {
+      "label": "Research",
+      "kind": "local",
+      "target": "research"
+    },
+    {
+      "label": "Projects",
+      "kind": "local",
+      "target": "projects"
+    },
+    {
+      "label": "People",
+      "kind": "local",
+      "target": "people"
+    },
+    {
+      "label": "Sponsors",
+      "kind": "local",
+      "target": "sponsors"
+    },
+    {
+      "label": "Personal page",
+      "kind": "page",
+      "target": "index.html"
+    }
+  ],
+  "sponsors": [
+    {
+      "name": "National Science Foundation",
+      "url": "https://www.nsf.gov/",
+      "programs": [
+        {
+          "title": "NAIRR Pilot — research resources",
+          "year": 2026,
+          "url": "https://submit-nairr.xras.org/current-projects?_requestNumber=NAIRR260099"
+        },
+        {
+          "title": "NAIRR Classroom — teaching resources",
+          "year": 2026,
+          "url": "https://submit-nairr.xras.org/current-projects?_requestNumber=NAIRR260023"
+        }
+      ],
+      "label": "NSF",
+      "logo": "logos/nsf.png"
+    },
+    {
+      "name": "U.S. Department of Energy",
+      "url": "https://www.energy.gov/",
+      "programs": [
+        {
+          "title": "Genesis Mission — Phase I",
+          "year": 2026,
+          "url": "https://inside.charlotte.edu/2026/07/22/unc-charlotte-projects-named-in-first-cohort-of-u-s-department-of-energy-genesis-mission/"
+        }
+      ],
+      "label": "DOE",
+      "logo": "logos/doe.png"
+    },
+    {
+      "name": "University of North Carolina at Charlotte",
+      "label": "UNC Charlotte",
+      "url": "https://www.charlotte.edu/",
+      "logo": "logos/charlotte.png",
+      "programs": []
+    }
+  ]
+}
