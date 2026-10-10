@@ -6,7 +6,7 @@ In `/admin/?tab=design`, choose **Import design XML**, preview the result, and u
 
 The root must be `<website-design version="1">`. All five groups and their documented attributes are required. Numbers have no units; colors are six-digit hex values. Allowed font identifiers: `optima`, `palatino`, `source-sans`, `inter`, `plex`, `source-serif`. Layout, spacing, type sizes, and contrast use the same limits as the editor. Arbitrary HTML, CSS, document types, and entity declarations are rejected. Files must be at most 64 KiB.
 
-Optima uses an installed system font, followed by Candara and the locally hosted Source Sans 3 fallback. It is not bundled. The Chinese name keeps its independent Kai font.
+Optima uses an installed system font, followed by Candara and the locally hosted Source Sans 3 fallback. It is not bundled. The Chinese name keeps its independent 行楷 font.
 
 From the repository root:
 

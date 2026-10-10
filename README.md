@@ -37,7 +37,7 @@ personal website
 
 The Design tab now offers **Export design XML** and **Import design XML**. Export downloads the current draft; import changes only design settings, preserving news, papers, and other content. Preview the imported design, then choose **Save files** in the local editor. `content/design.json` remains the active source, and each build exports the published design to `/assets/design.xml`.
 
-Current snapshots are `assets/design-examples/design-palatino.xml` (previous design) and `assets/design-examples/design-optima.xml` (current trial). Optima is preferred for body text and headings, with Candara and locally hosted Source Sans 3 as fallbacks when unavailable. Navigation keeps Source Sans 3; 王金震 keeps Kai. Optima is not bundled.
+Current snapshots are `assets/design-examples/design-palatino.xml` (previous design) and `assets/design-examples/design-optima.xml` (current trial). Optima is preferred for body text and headings, with Candara and locally hosted Source Sans 3 as fallbacks when unavailable. Navigation keeps Source Sans 3; 王金震 uses 行楷. Optima is not bundled.
 
 ```bash
 python3 scripts/design_xml.py export my-design.xml
@@ -45,3 +45,7 @@ python3 scripts/design_xml.py import my-design.xml
 ```
 
 CLI import validates, backs up changed source, and rebuilds/checks before saving. Commit and push afterward. See `assets/design-examples/README.md` for the XML format. All groups/attributes are required; numeric values have no units, colors use six-digit hex values, and the editor's existing size and contrast limits apply.
+
+### Chinese name typography
+
+王金震 uses 行楷, preferring installed STXingkai/华文行楷. `assets/fonts/hpdi-name-xingkai.woff` provides a locally hosted running-script fallback: Zhi Mang Xing, subsetted to these three characters with its original metadata and OFL license retained. It loads only 2.6 KB and needs no external font service. If the Chinese name changes, regenerate this subset. English text uses the active Design font settings.
