@@ -26,7 +26,7 @@ Run `git pull --ff-only` before starting a new editing session so local work and
 
 The root `index.html` is the old Google Sites redirect. It is retained as legacy source; the new homepage is generated at `dist/index.html`. Existing underscore HTML routes, old CSS, PDFs in `files/`, and images in `imgs/` are copied into the Pages output at their original paths. `content/legacy.json` lists these passthrough resources. Their bytes are checked, but the old HTML's pre-existing broken links/metadata are not silently rewritten.
 
-The public GitHub source starts with an empty student roster, as student information is deferred. The private ChatGPT-hosted demo and this GitHub repository are separate deployments: edits pushed here do not automatically update the ChatGPT demo.
+The public GitHub source includes the three student/alumni profiles confirmed from the owner’s public team page; additional profiles remain deferred. The private ChatGPT-hosted demo and this GitHub repository are separate deployments: edits pushed here do not automatically update the ChatGPT demo.
 
 ---
 
@@ -61,3 +61,11 @@ Every lab demo renders only the three linked logos on transparent backgrounds, w
 ### Footer and Chinese name previews
 
 The footer date comes from `content/profile.json` → `updated` and is displayed as `Last update: (date)`. The extra email link in the personal homepage recruiting sentence is removed. Open `/fonts.html#chinese-fonts` to compare 楷体, 行楷, and 草书, then follow a homepage preview link. These query-based previews do not save settings; 行楷 remains the default. All three name fonts are local, three-character subsets, with preserved licenses.
+
+### Confirmed team profiles
+
+On October 10, 2026, the owner requested profiles from https://sites.google.com/charlotte.edu/hpdilab/team. The lab roster lists Ph.D. students Khondoker Mirazul Mumenin and Jiaxiang Zhang, plus Raivat Alwar under Alumni, following that page's grouping and stated M.S. role. Background and research summaries are compact; no joining or graduation dates are inferred. Bios and research topics can be edited in the People form. Each record stores its source URL. Team photos were unavailable, so these profiles use text. The lab header shows `HPDi Lab` and the mission only.
+
+The UNC Charlotte sponsor uses the supplied horizontal logo. All sponsor artwork keeps its proportions at a shared display height, with a smaller equal height on mobile.
+
+The header displays only the official CCI logo, left aligned; navigation and theme controls remain right aligned. The horizontal UNC Charlotte logo remains in Sponsors.

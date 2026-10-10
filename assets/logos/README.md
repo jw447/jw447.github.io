@@ -18,3 +18,5 @@ listed at the owner's request, without invented award names or funding amounts.
 - `cci.png`: original college wordmark from https://cci.charlotte.edu/wp-content/uploads/sites/209/2024/07/CCI-Logo.png, listed in the college's official media collection at https://cci.charlotte.edu/wp-json/wp/v2/media/19323.
 
 Downloaded October 10, 2026. These originals are displayed without recoloring or cropping, on a white background in both themes.
+
+The owner selected `charlotte-horizontal.png` for the UNC Charlotte sponsor. The header displays only `cci.png`. Sponsor images use a shared CSS height and natural widths rather than fixed equal-width image boxes.

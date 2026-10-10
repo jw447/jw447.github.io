@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "name": "Khondoker Mirazul Mumenin",
+    "role": "Ph.D. student, Computer Science",
+    "group": "Students",
+    "bio": "Bachelor’s degree in Electronics and Communication Engineering from Khulna University, Bangladesh.",
+    "topic": "Machine learning for scientific data compression and efficient, scalable scientific computing workflows.",
+    "joined": "",
+    "url": "",
+    "source_url": "https://sites.google.com/charlotte.edu/hpdilab/team",
+    "approved": true
+  },
+  {
+    "name": "Jiaxiang Zhang",
+    "role": "Ph.D. student, Computer Science",
+    "group": "Students",
+    "bio": "Dual bachelor’s degrees in Applied Mathematics and Information Science, with a minor in Data Science, from UNC Chapel Hill (2025).",
+    "topic": "",
+    "joined": "",
+    "url": "",
+    "source_url": "https://sites.google.com/charlotte.edu/hpdilab/team",
+    "approved": true
+  },
+  {
+    "name": "Raivat Alwar",
+    "role": "M.S. student, Computer Science",
+    "group": "Alumni",
+    "bio": "Bachelor’s degree in Computer Science & Engineering from the University of California, Merced (2024).",
+    "topic": "",
+    "joined": "",
+    "url": "",
+    "source_url": "https://sites.google.com/charlotte.edu/hpdilab/team",
+    "approved": true
+  }
+]

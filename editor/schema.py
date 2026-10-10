@@ -51,7 +51,9 @@ SECTIONS = [
     dict(key='people', label='People', path=['people'], list=True, fields=[
         field('name', 'Name', required=True), field('role', 'Role', required=True),
         field('group', 'Group', 'select', True, choices=['Students', 'Alumni', 'Collaborators']),
+        field('bio', 'Short biography / background', 'textarea'),
         field('topic', 'Research topic', 'textarea'), field('joined', 'Joined'), field('url', 'Personal URL', 'url'),
+        field('source_url', 'Profile information source', 'url'),
         field('approved', 'Show this profile on the lab page', 'checkbox'),
     ]),
     dict(key='lab', label='Lab overview', path=['lab'], fields=[
@@ -61,7 +63,7 @@ SECTIONS = [
     dict(key='sponsors', label='Sponsors', path=['lab', 'sponsors'], list=True, fields=[
         field('name', 'Sponsor name', required=True), field('url', 'Sponsor website', 'url', True),
         field('label', 'Short display name'),
-        field('logo', 'Sponsor logo', 'select', choices=['', 'logos/nsf.png', 'logos/doe.png', 'logos/charlotte.png'], labels=['No logo', 'NSF', 'DOE', 'UNC Charlotte']),
+        field('logo', 'Sponsor logo', 'select', choices=['', 'logos/nsf.png', 'logos/doe.png', 'logos/charlotte.png', 'logos/charlotte-horizontal.png'], labels=['No logo', 'NSF', 'DOE', 'UNC Charlotte (stacked)', 'UNC Charlotte (horizontal)']),
         field('programs', 'Programs / awards', 'records', fields=PROGRAMS),
     ]),
 ]
