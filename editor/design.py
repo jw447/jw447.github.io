@@ -6,6 +6,7 @@ import re
 LIGHT = dict(accent='#005035', gold='#A49665', paper='#FFFFFF', ink='#252B2A', muted='#626D68', line='#DCE2DE', **{'accent-soft': '#EEF4F1'})
 DARK = dict(accent='#8FB9A0', gold='#C3B387', paper='#1B1B1B', ink='#E8E4DC', muted='#B2AEA6', line='#3B3B3B', **{'accent-soft': '#262626'})
 FONTS = {
+    'optima': "Optima,Candara,'Source Sans 3',Arial,sans-serif",
     'palatino': "'TeX Gyre Pagella',Palatino,'Palatino Linotype',serif",
     'source-sans': "'Source Sans 3',Arial,sans-serif",
     'inter': 'Inter,Arial,sans-serif',
@@ -22,7 +23,7 @@ def control(key, label, default, minimum=None, maximum=None, step=1, choices=Non
     return result
 
 FONT_CHOICES = list(FONTS)
-FONT_LABELS = ['TeX Gyre Pagella / Palatino', 'Source Sans 3', 'Inter', 'IBM Plex Sans', 'Source Serif 4']
+FONT_LABELS = ['Optima (system font)', 'TeX Gyre Pagella / Palatino', 'Source Sans 3', 'Inter', 'IBM Plex Sans', 'Source Serif 4']
 GROUPS = [
     dict(key='typography', label='Typography', fields=[
         control('body_font', 'Body typeface', 'palatino', choices=FONT_CHOICES, labels=FONT_LABELS),

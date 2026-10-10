@@ -70,6 +70,9 @@ window.HPDiDesignEditor = function(options) {
   });
   $('design-preset').addEventListener('change',()=>{$('delete-preset').disabled=!$('design-preset').value.startsWith('saved-');});
   $('delete-preset').addEventListener('click',()=>{if(!$('design-preset').value.startsWith('saved-'))return;const index=Number($('design-preset').value.slice(6));if(!confirm(`Delete saved preset “${saved[index].name}”? The current design stays in your draft.`))return;saved.splice(index,1);persistPresets();refreshPresets();});
+  $('export-design-xml').addEventListener('click',()=>{try{const xml=window.HPDiDesignXML.stringify(options.get(),groups),url=URL.createObjectURL(new Blob([xml],{type:'application/xml;charset=utf-8'})),anchor=node('a');anchor.href=url;anchor.download='HPDi-design.xml';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000);options.notice('Design XML exported. Your content is unchanged.');}catch(error){options.errors([error.message]);}});
+  $('import-design-xml').addEventListener('click',()=>$('design-xml-file').click());
+  $('design-xml-file').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;try{if(file.size>window.HPDiDesignXML.MAX_BYTES)throw new Error('Choose a design XML file smaller than 64 KiB.');const design=window.HPDiDesignXML.parse(await file.text(),groups);replace(design,'Design XML imported into this draft. Preview it, then save locally.');}catch(error){options.errors([error.message]);options.notice('XML was not imported; your current design is unchanged.');}finally{event.target.value='';}});
   $('reset-design').addEventListener('click',()=>replace(defaults,'Charlotte green and charcoal defaults restored to this draft.'));
   for(const id of ['design-layout','design-page'])$(id).addEventListener('change',loadPage);
   for(const id of ['design-viewport','design-theme'])$(id).addEventListener('change',apply);

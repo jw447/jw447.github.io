@@ -10,6 +10,7 @@ from publication_format import publication_label
 from editor.content import bundle as editor_bundle
 from editor.schema import SECTIONS as editor_sections
 from editor.design import default_design, token_css, validate_design
+from editor.design_xml import to_xml
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / 'dist'
@@ -34,7 +35,7 @@ papers=sorted(load('publications'),key=lambda x:x['year'],reverse=True)
 projects=load('projects'); teaching=load('teaching'); lab=load('lab')
 people=[person for person in load('people') if person.get('approved') is True]
 name_heading=e(profile['name'])+(f' <span class="chinese-name" lang="zh-Hans">{e(profile["name_chinese"])}</span>' if profile.get('name_chinese') else '')
-FONTS=[('source-sans','Source Sans 3','Warm, readable, understated sans-serif alternative.'),('inter','Inter','Crisp and modern, with a clean sans-serif hierarchy.'),('plex','IBM Plex Sans','A distinctive technical character, well suited to systems research.'),('serif','Source Serif 4 + Source Sans 3','Contemporary serif headings with readable sans-serif body text.'),('palatino','TeX Gyre Pagella / Palatino','Selected academic style. Locally hosted TeX Gyre Pagella for body and headings, with Palatino as fallback. Navigation uses Source Sans 3.')]
+FONTS=[('optima','Optima','Current trial. Uses installed Optima, with Candara and locally hosted Source Sans 3 as fallbacks.'),('source-sans','Source Sans 3','Warm, readable, understated sans-serif alternative.'),('inter','Inter','Crisp and modern, with a clean sans-serif hierarchy.'),('plex','IBM Plex Sans','A distinctive technical character, well suited to systems research.'),('serif','Source Serif 4 + Source Sans 3','Contemporary serif headings with readable sans-serif body text.'),('palatino','TeX Gyre Pagella / Palatino','Academic serif alternative. Locally hosted TeX Gyre Pagella for body and headings, with Palatino as fallback. Navigation uses Source Sans 3.')]
 
 def link(label,url,cls=''):
     return f'<a class="{e(cls)}" href="{e(url)}">{e(label)}</a>'
@@ -128,7 +129,7 @@ peoplebody=intro('Lab directory','Student profiles now belong to the dedicated l
 home_sections=section('News','<div class="news-scroll" role="region" aria-label="News updates" tabindex="0">'+newslist(news)+'</div>',anchor='news')
 home_sections+=section('Publications',author_legend+paperlist(papers),profile['scholar'],'Google Scholar →',anchor='papers')
 home_sections+=section('Teaching',course_content,anchor='teaching')
-fontbody=intro('Typography options','Compare the same academic content in five typeface options. Open a full-page preview to see each font in context.')
+fontbody=intro('Typography options','Compare the same academic content in six typeface options. Open a full-page preview to see each font in context.')
 for key,name,desc in FONTS:
     fontbody+=f'''<section class="font-sample" data-font="{key}"><div class="font-sample-label"><span>{e(name)}</span>{link('Preview full website →','index.html?font='+key+'&preview=fonts')}</div><h2>Jinzhen Wang</h2><h3>High-performance computing & scientific data</h3><p>I lead the High-Performance Data Intensive Lab at UNC Charlotte. My research focuses on data reduction, compression, and parallel and distributed systems.</p><p class="sample-paper">DeepCQ: A Two-Stage Deep-Surrogate Framework for Lossy Compression Quality Prediction</p><p class="font-sample-description">{e(desc)}</p></section>'''
 labbody=f'''<section class="lab-hero" id="lab-overview"><p class="eyebrow">UNC Charlotte · Computer Science</p><h1>{e(profile['lab'])}</h1><p class="lab-full-name">{e(profile['lab_name'])}</p><p class="lab-mission">{e(lab['mission'])}</p></section>'''
@@ -182,6 +183,7 @@ render_simple(OUT,compact_profile,settings,lab,news,papers,teaching,compact_proj
 shutil.copy2(ROOT/'editor/index.html', OUT/'admin/index.html')
 (OUT/'admin/editor-data.json').write_text(json.dumps(editor_bundle(ROOT),ensure_ascii=False))
 (OUT/'admin/editor-schema.json').write_text(json.dumps(editor_sections,ensure_ascii=False))
+(OUT/'assets/design.xml').write_text(to_xml(design_settings),encoding='utf-8')
 (OUT/'admin/design-defaults.json').write_text(json.dumps(default_design(),ensure_ascii=False))
 (OUT/'.nojekyll').touch()
 legacy_path=ROOT/'content/legacy.json'

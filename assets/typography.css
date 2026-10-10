@@ -45,3 +45,5 @@ body{font-size:16px;font-optical-sizing:auto}h1,h2,.identity strong,.profile h2{
 
 @font-face{font-family:'HPDi Name Kai';src:local('Kaiti SC'),local('STKaiti'),local('KaiTi'),local('楷体'),local('STXingkai'),local('华文行楷'),url('fonts/hpdi-name-kai.woff') format('woff');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+738B,U+91D1,U+9707}
 .chinese-name{display:inline-block;margin-inline-start:8px;font-family:'HPDi Name Kai','Kaiti SC',STKaiti,KaiTi,'楷体',STXingkai,'华文行楷',serif;font-size:.65em;font-weight:400;letter-spacing:0;white-space:nowrap;line-height:1.4}
+
+[data-font="optima"]{--sans:Optima,Candara,'Source Sans 3',Arial,sans-serif;--serif:Optima,Candara,'Source Sans 3',Arial,sans-serif;--heading-weight:400;--heading-spacing:0px}

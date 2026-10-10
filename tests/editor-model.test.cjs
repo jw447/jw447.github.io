@@ -73,3 +73,34 @@ test('preview tokens match the Python generator after layout and font edits', ()
   assert.equal(D.contrast('#FFFFFF','#000000'),21);
   assert.throws(()=>D.css({...design,layout:{...design.layout,page_width:Infinity}},groups));
 });
+
+test('XML export matches Python and round-trips all settings including Optima', () => {
+  const X=require('../assets/design-xml.js'),{execFileSync}=require('node:child_process');
+  const groups=schema.find(x=>x.key==='design').groups,design=M.clone(baseline.design);
+  design.typography.body_font='optima';design.typography.heading_font='optima';
+  design.typography.body_size=18;design.layout.portrait_position='right';
+  const xml=X.stringify(design,groups);
+  const restored=JSON.parse(execFileSync('python3',['-c','import json,sys;from editor.design_xml import from_xml;print(json.dumps(from_xml(sys.stdin.read())))'],{cwd:root,input:xml,encoding:'utf8'}));
+  assert.deepEqual(restored,design);
+  const pythonXML=execFileSync('python3',['-c','import json,sys;from editor.design_xml import to_xml;sys.stdout.write(to_xml(json.load(sys.stdin)))'],{cwd:root,input:JSON.stringify(design),encoding:'utf8'});
+  assert.equal(xml,pythonXML);
+  const css=execFileSync('python3',['-c','import json,sys;from editor.design import token_css;sys.stdout.write(token_css(json.load(sys.stdin)))'],{cwd:root,input:JSON.stringify(design),encoding:'utf8'});
+  assert.equal(D.css(design,groups),css);
+  assert.throws(()=>X.parse('<!DOCTYPE design>',groups),/entity declarations/);
+  assert.throws(()=>X.parse(' '.repeat(65537),groups),/64 KiB/);
+  design.typography.body_size=15;assert.throws(()=>X.stringify(design,groups));
+});
+
+
+test('normal navigation preserves imported design fonts; explicit font previews propagate', () => {
+  const vm=require('node:vm'),source=fs.readFileSync(path.join(root,'assets/site.js'),'utf8');
+  for(const search of ['', '?font=palatino', '?preview=fonts']){
+    let href='lab.html';const styles={};
+    const link={getAttribute:()=>href,closest:()=>null,setAttribute:(_,value)=>{href=value;}};
+    const document={documentElement:{classList:{add(){}}},body:{dataset:{font:'optima'},style:{setProperty:(key,value)=>{styles[key]=value;}}},querySelector:()=>null,querySelectorAll:selector=>selector==='a[href]'?[link]:[]};
+    vm.runInNewContext(source,{document,window:{},location:{search,href:'https://example.org/index.html'+search,origin:'https://example.org'},URL,URLSearchParams});
+    if(!search){assert.equal(href,'lab.html');assert.deepEqual(styles,{});}
+    else if(search.includes('palatino')){assert.match(href,/font=palatino/);assert.match(styles['--d-body-font'],/Pagella/);}
+    else{assert.match(href,/preview=fonts/);assert.match(styles['--d-body-font'],/Optima/);}
+  }
+});
