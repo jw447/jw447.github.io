@@ -47,3 +47,16 @@ body{font-size:16px;font-optical-sizing:auto}h1,h2,.identity strong,.profile h2{
 .chinese-name{display:inline-block;margin-inline-start:8px;font-family:'HPDi Name Xingkai',STXingkai,'华文行楷','Kaiti SC',STKaiti,KaiTi,serif;font-size:.65em;font-weight:400;letter-spacing:0;white-space:nowrap;line-height:1.4}
 
 [data-font="optima"]{--sans:Optima,Candara,'Source Sans 3',Arial,sans-serif;--serif:Optima,Candara,'Source Sans 3',Arial,sans-serif;--heading-weight:400;--heading-spacing:0px}
+
+@font-face{font-family:'HPDi Name Kai';src:local('Kaiti SC'),local('STKaiti'),local('KaiTi'),url('fonts/hpdi-name-kai.woff') format('woff');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+738B,U+91D1,U+9707}
+@font-face{font-family:'HPDi Name Cursive';src:url('fonts/hpdi-name-cursive.woff') format('woff');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+738B,U+91D1,U+9707}
+html[data-chinese-font="kai"] .chinese-name{font-family:'HPDi Name Kai',serif}
+html[data-chinese-font="cursive"] .chinese-name{font-family:'HPDi Name Cursive',cursive}
+html .chinese-name[data-name-font="kai"]{font-family:'HPDi Name Kai',serif}
+html .chinese-name[data-name-font="xingkai"]{font-family:'HPDi Name Xingkai',serif}
+html .chinese-name[data-name-font="cursive"]{font-family:'HPDi Name Cursive',cursive}
+.name-font-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:24px 0 40px}
+.name-font-sample{padding:20px 0;border-top:1px solid var(--line)}
+.name-font-sample .chinese-name{display:block;margin:14px 0;font-size:48px}
+.name-font-sample p,.name-font-sample a{font-size:16px}
+@media(max-width:700px){.name-font-grid{grid-template-columns:1fr;gap:14px}}

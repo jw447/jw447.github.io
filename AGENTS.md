@@ -55,7 +55,7 @@ The owner favors Classic A and requested moving the profile sidebar into the mai
 - The owner chose UNC Charlotte colors. Light mode uses official Charlotte Green (#005035) for links and navigation, white (#FFFFFF) surfaces, charcoal body text, and restrained Niner Gold (#A49665) for section markers and active-navigation underlines. Gold is decorative, not small text on white. Preserve this palette for future logo and slide work. Colors were verified against the university brand palette on October 9, 2026. Avoid gradients, decorative animation, icon collections, and dashboard-like panels.
 - Retain semantic headings, keyboard access, visible focus, reduced-motion support, and narrow-screen layouts.
 - News text is 16px. No text may be smaller, including labels, author lists, controls, captions, contact details, and mobile layouts. Preserve compact spacing without shrinking type.
-- Sponsors are NSF, DOE, and UNC Charlotte, with official local logo assets, full alt text, and original artwork on white panels in both themes. Keep logo source provenance in `assets/logos/README.md`. Charlotte has no supplied program metadata; do not invent awards or support amounts.
+- Sponsors are NSF, DOE, and UNC Charlotte, with official local logo assets, full alt text, and original transparent artwork in both themes; sponsor sections show only linked logos, without descriptions, captions, project/program lists, cards, or background panels. Keep logo source provenance in `assets/logos/README.md`. Charlotte has no supplied program metadata; do not invent awards or support amounts.
 - Use relative links and local assets. Do not add external fonts, analytics, remote data fetching, npm frameworks, or a backend for routine content changes.
 - The bundled fonts are an intentional owner-requested exception to the original system-font-only demo. Use their local assets and preserve the included licenses. Do not add a CDN request.
 - Keep all demos consistent until the owner selects one. Once chosen, remove the alternate cleanly if requested.
@@ -109,4 +109,12 @@ The owner authorized XML import/export and an Optima trial. `editor/design_xml.p
 
 ## Header refinement
 
-The owner requested right-aligned header contents across the demos and sun/moon theme controls. Keep the shared header flex alignment at the right, with safe navigation overflow on narrow screens. The theme button contains monochrome SVG symbols, has accessible action labels/tooltips, and shows moon to offer dark mode or sun to offer light mode. Preserve these symbols in design preview rather than replacing them with text.
+The owner requested left-aligned institutional logos with right-aligned navigation and theme controls across the demos and sun/moon theme controls. Keep the logo group on the left using its auto end margin, with the other header controls aligned right, with safe navigation overflow on narrow screens. The theme button contains monochrome SVG symbols, has accessible action labels/tooltips, and shows moon to offer dark mode or sun to offer light mode. Preserve these symbols in design preview rather than replacing them with text.
+
+## Sponsor presentation
+
+The owner requested logo-only sponsors: retain the section heading and three linked original logos, with transparent backgrounds in both modes. Program metadata remains in `content/lab.json` for maintenance but is not displayed. Keep accessible organization names in image alt text. Institutional header logo panels remain separate from this sponsor-specific change.
+
+## Footer and name-style review
+
+The footer displays `Last update: (date)` from `profile.updated`, including on mobile. Update that source date intentionally when making visible changes; avoid nondeterministic build timestamps. The personal homepage recruiting sentence no longer repeats an email link; the primary contact chip remains. `fonts.html#chinese-fonts` compares 楷体, 行楷, 草书 with actual three-character local font subsets. `?chinese-font=kai|xingkai|cursive` gives reversible review previews, carried across internal page navigation by `assets/name-fonts.js`. The saved/default name style remains 行楷 until the owner chooses another. Preserve each font's license and regenerate its subset if name characters change.

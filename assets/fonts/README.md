@@ -20,3 +20,7 @@ Source TTF SHA-256: `39ad71264b588165b469e35e6afb162a378dacd1f95348160240ba9038a
 ## Chinese name: 行楷 / running script
 
 `hpdi-name-xingkai.woff` is a web-delivery subset containing only 王金震 (U+738B, U+91D1, U+9707), made with FontTools without changing outlines. Source: https://github.com/google/fonts/blob/main/ofl/zhimangxing/ZhiMangXing-Regular.ttf . Downloaded October 10, 2026 (America/New_York). Zhi Mang Xing is a semi-cursive running script by Wei Zhimang; its original copyright/name metadata and accompanying `ZhiMangXing-OFL.txt` are retained. The shared name face prefers installed STXingkai/华文行楷, then this local subset. The former WenKai subset remains available as an archived asset and is no longer the active name font. Regenerate this subset if the Chinese name changes. No runtime CDN requests are made.
+
+## Chinese name style comparisons
+
+The existing WenKai and Zhi Mang Xing subsets provide 楷体 and 行楷 samples. `hpdi-name-cursive.woff` provides the 草书 sample, subsetted without changing outlines from https://github.com/google/fonts/blob/main/ofl/liujianmaocao/LiuJianMaoCao-Regular.ttf on October 10, 2026. It contains only 王金震 with original metadata preserved. Its companion `LiuJianMaoCao-OFL.txt` retains the copyright and SIL Open Font License. `assets/chinese-name-samples.png` is an exact rendered specimen of the bundled subsets, not a browser screenshot.

@@ -59,3 +59,7 @@ body .profile-controls>a:hover{border-color:var(--accent);text-decoration:none}
 @media print{body .profile-controls{overflow:visible;max-width:none}}
 
 body .site-header .menu-toggle,body .site-header .theme-toggle{margin-left:0;margin-inline-start:0}
+
+/* Institutional logos stay left; navigation and theme control stay right. */
+body .site-header .institution-logos{margin-inline-end:auto}
+body .site-footer .last-update{display:inline}

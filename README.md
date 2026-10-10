@@ -52,4 +52,12 @@ CLI import validates, backs up changed source, and rebuilds/checks before saving
 
 ### Header controls
 
-Header logos, navigation, and theme controls align to the right. The moon switches to dark mode; the sun switches to light mode. The icon button retains an accessible action label and tooltip, with the same theme persistence and device-preference behavior.
+Header logos align to the left; navigation and theme controls align to the right. The moon switches to dark mode; the sun switches to light mode. The icon button retains an accessible action label and tooltip, with the same theme persistence and device-preference behavior.
+
+### Sponsor presentation
+
+Every lab demo renders only the three linked logos on transparent backgrounds, with original colors and proportions. Descriptions, sponsor labels, and project/program lists are not displayed. Program metadata remains in the source for future maintenance.
+
+### Footer and Chinese name previews
+
+The footer date comes from `content/profile.json` → `updated` and is displayed as `Last update: (date)`. The extra email link in the personal homepage recruiting sentence is removed. Open `/fonts.html#chinese-fonts` to compare 楷体, 行楷, and 草书, then follow a homepage preview link. These query-based previews do not save settings; 行楷 remains the default. All three name fonts are local, three-character subsets, with preserved licenses.
