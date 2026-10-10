@@ -49,3 +49,7 @@ CLI import validates, backs up changed source, and rebuilds/checks before saving
 ### Chinese name typography
 
 王金震 uses 行楷, preferring installed STXingkai/华文行楷. `assets/fonts/hpdi-name-xingkai.woff` provides a locally hosted running-script fallback: Zhi Mang Xing, subsetted to these three characters with its original metadata and OFL license retained. It loads only 2.6 KB and needs no external font service. If the Chinese name changes, regenerate this subset. English text uses the active Design font settings.
+
+### Header controls
+
+Header logos, navigation, and theme controls align to the right. The moon switches to dark mode; the sun switches to light mode. The icon button retains an accessible action label and tooltip, with the same theme persistence and device-preference behavior.

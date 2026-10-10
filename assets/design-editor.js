@@ -45,7 +45,7 @@ window.HPDiDesignEditor = function(options) {
     if(document?.getElementById('draft-design')){
       document.getElementById('draft-design').textContent=D.css(lastValid,groups);document.documentElement.dataset.portrait=lastValid.layout.portrait_position;document.documentElement.dataset.theme=$('design-theme').value;
       document.documentElement.classList.add('js');
-      document.querySelectorAll('.theme-toggle').forEach(button=>{button.hidden=false;button.textContent=$('design-theme').value==='dark'?'Light mode':'Dark mode';});
+      document.querySelectorAll('.theme-toggle').forEach(button=>{button.hidden=false;const dark=$('design-theme').value==='dark',label=dark?'Switch to light mode':'Switch to dark mode';button.setAttribute('aria-label',label);button.setAttribute('title',label);button.setAttribute('aria-pressed',String(dark));});
       document.querySelectorAll('.paper-tools').forEach(panel=>{panel.hidden=false;});
     }
     scale();

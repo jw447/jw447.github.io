@@ -14,7 +14,7 @@
     root.dataset.theme = theme;
     document.querySelectorAll('.theme-toggle').forEach(button => {
       const dark = theme === 'dark';
-      button.textContent = dark ? 'Light mode' : 'Dark mode';
+      button.setAttribute('title', dark ? 'Switch to light mode' : 'Switch to dark mode');
       button.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
       button.setAttribute('aria-pressed', String(dark));
       button.hidden = false;

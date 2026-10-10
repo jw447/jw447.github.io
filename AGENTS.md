@@ -106,3 +106,7 @@ The owner requested official UNC Charlotte and CCI logos in the top header in pl
 ## Design XML interchange
 
 The owner authorized XML import/export and an Optima trial. `editor/design_xml.py` and `assets/design-xml.js` implement version-1 design-only XML and must stay equivalent. `content/design.json` remains the only active design source. Build output `/assets/design.xml` exports the published settings; files under `assets/design-examples/` are reversible snapshots. UI imports update only the design draft; local Save files performs validation/backups/builds. `scripts/design_xml.py` provides equivalent CLI export/import. Reject extra/missing groups or attributes, unsafe declarations, arbitrary CSS, invalid bounds/contrast, and files over 64 KiB. Keep Chinese 行楷 styling independent of the English Optima trial. Run XML round-trip/rejection/content-preservation tests alongside existing editor tests.
+
+## Header refinement
+
+The owner requested right-aligned header contents across the demos and sun/moon theme controls. Keep the shared header flex alignment at the right, with safe navigation overflow on narrow screens. The theme button contains monochrome SVG symbols, has accessible action labels/tooltips, and shows moon to offer dark mode or sun to offer light mode. Preserve these symbols in design preview rather than replacing them with text.
