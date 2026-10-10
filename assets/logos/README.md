@@ -11,3 +11,10 @@ proportions, and artwork are preserved. Logos sit on white panels in both themes
 
 NSF and DOE program links retain the confirmed support entries. UNC Charlotte is
 listed at the owner's request, without invented award names or funding amounts.
+
+## Institutional header
+
+- `charlotte-horizontal.png`: original horizontal two-color university mark from https://brand.charlotte.edu/wp-content/uploads/sites/183/2023/04/Master_horizontal.png (https://brand.charlotte.edu/visual-identity/logo-system/).
+- `cci.png`: original college wordmark from https://cci.charlotte.edu/wp-content/uploads/sites/209/2024/07/CCI-Logo.png, listed in the college's official media collection at https://cci.charlotte.edu/wp-json/wp/v2/media/19323.
+
+Downloaded October 10, 2026. These originals are displayed without recoloring or cropping, on a white background in both themes.

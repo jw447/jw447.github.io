@@ -31,11 +31,4 @@ if('IntersectionObserver' in window){
  const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(!entry.isIntersecting)continue;for(const a of sectionLinks){if(a.dataset.section===entry.target.id)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');}}},{rootMargin:'-100px 0px -65% 0px',threshold:0});
  sectionLinks.forEach(a=>{const s=document.getElementById(a.dataset.section);if(s)observer.observe(s);});
 }
-const tools=document.querySelector('.paper-tools');
-if(tools){
- tools.hidden=false;
- const search=document.querySelector('#paper-search'),year=document.querySelector('#paper-year'),papers=[...document.querySelectorAll('.paper')];
- const filter=()=>{const query=search.value.toLocaleLowerCase().trim();let shown=0;for(const paper of papers){const match=(year.value==='all'||paper.dataset.year===year.value)&&paper.textContent.toLocaleLowerCase().includes(query);paper.hidden=!match;if(match)shown++;}document.querySelector('#paper-count').textContent=`${shown} of ${papers.length} papers`;document.querySelector('#no-papers').hidden=shown!==0;};
- search.addEventListener('input',filter);year.addEventListener('change',filter);filter();
-}
 document.querySelectorAll('.copy-citation').forEach(button=>button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(button.previousElementSibling.textContent);button.textContent='Copied';setTimeout(()=>button.textContent='Copy citation',1800);}catch{button.textContent='Select the citation text to copy';}}));

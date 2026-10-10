@@ -98,3 +98,7 @@ This is the GitHub Pages codebase. `dist/` is ignored and regenerated. Do not st
 `content/legacy.json` specifies original underscore HTML routes, `assets/main.css`, `files/`, and `imgs/` to copy unchanged into output. Preserve these files and URLs. Checks verify exact resource bytes separately from new-page metadata and links. The local editor's temporary builds must copy these resources too. No new student information is public until supplied by the owner.
 
 The ChatGPT demo is a separate Sites source/deployment. GitHub changes do not synchronize it automatically. Read README local instructions before editing; use Python 3.9+, rerun build/check after code edits, and push source to the requested branch.
+
+## Latest profile and publication refinement
+
+The owner requested official UNC Charlotte and CCI logos in the top header in place of the name/university text. Preserve both original logo assets on white backgrounds, in light and dark modes. Profile controls show exactly Google Scholar, CV, the email address, and the room together in one nonwrapping row in the main column. On narrow screens this row scrolls horizontally without reducing text size. Publication labels stay on one line; reserve at least eight body-size units for the desktop label column and use intrinsic sizing for longer labels. Publication search and year controls were removed; all papers stay visible. The author legend only explains underlined student names; PI authors remain bold without a legend sentence describing bold.
