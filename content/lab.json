@@ -1,5 +1,5 @@
 {
-  "mission": "We study efficient methods for managing scientific data on high-performance computing systems, with a focus on data reduction, compression, and parallel and distributed systems.",
+  "mission": "HPDi Lab is led by Jinzhen Wang in the Department of Computer Science at the University of North Carolina at Charlotte. We study high-performance computing and scientific data management, developing efficient methods for data reduction, compression, and data access in parallel and distributed systems. Our research combines system design, performance modeling, and machine learning to manage large scientific datasets and guide compression decisions. Our mission is to reduce the cost of storing, moving, and processing scientific data while preserving the information needed for analysis and discovery.",
   "research": [
     {
       "title": "Data reduction & compression",

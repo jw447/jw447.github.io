@@ -41,7 +41,7 @@ def link(label,url,cls=''):
     return f'<a class="{e(cls)}" href="{e(url)}">{e(label)}</a>'
 
 def head(title,desc,design,asset):
-    return f'''<!doctype html><html lang="en" data-portrait="{e(design_settings['layout']['portrait_position'])}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="{e(desc)}"><meta name="theme-color" content="{e(palette['accent'])}"><title>{e(title)} · Jinzhen Wang</title><link rel="icon" href="{asset}favicon.svg" type="image/svg+xml"><script src="{asset}theme.js"></script><script src="{asset}name-fonts.js" defer></script><link rel="stylesheet" href="{asset}colors.css"><link rel="stylesheet" href="{asset}style.css"><link rel="stylesheet" href="{asset}typography.css"><link rel="stylesheet" href="{asset}theme.css"><link rel="stylesheet" href="{asset}sponsors.css"><link rel="stylesheet" href="{asset}design-tokens.css"><link rel="stylesheet" href="{asset}design.css"><script src="{asset}site.js" defer></script></head><body data-design="{design}" data-font="{e(settings['font'])}"><a class="skip-link" href="#main">Skip to content</a>'''
+    return f'''<!doctype html><html lang="en" data-portrait="{e(design_settings['layout']['portrait_position'])}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="{e(desc)}"><meta name="theme-color" content="{e(palette['accent'])}"><title>{e(title)}</title><link rel="icon" href="{asset}favicon.svg" type="image/svg+xml"><script src="{asset}theme.js"></script><script src="{asset}name-fonts.js" defer></script><link rel="stylesheet" href="{asset}colors.css"><link rel="stylesheet" href="{asset}style.css"><link rel="stylesheet" href="{asset}typography.css"><link rel="stylesheet" href="{asset}theme.css"><link rel="stylesheet" href="{asset}sponsors.css"><link rel="stylesheet" href="{asset}design-tokens.css"><link rel="stylesheet" href="{asset}design.css"><script src="{asset}site.js" defer></script></head><body data-design="{design}" data-font="{e(settings['font'])}"><a class="skip-link" href="#main">Skip to content</a>'''
 
 def sidebar(asset):
     return f'''<aside class="profile" aria-label="Profile"><img class="portrait" src="{asset}jinzhen-wang.jpg" alt="Jinzhen Wang" width="520" height="440"><div class="profile-info"><h2>{e(profile['name'])}</h2><p class="role">{e(profile['role'])}</p><p class="affiliation">Computer Science<br>UNC Charlotte</p><a class="lab-label" href="lab.html">HPDi Lab <span>High-Performance<br>Data Intensive Lab</span></a></div></aside>'''
@@ -59,7 +59,8 @@ def page(filename,title,body,design='classic',description=None,lab_page=False):
         else:
             nav+=f'<a href="{e(item["target"])}"'+(' aria-current="page"' if filename==item['target'] else '')+(' class="nav-lab"' if item['target']=='lab.html' else '')+f'>{e(item["label"])}</a>'
     font_controls='<aside class="font-preview" hidden aria-label="Typography preview"><div class="font-preview-title"><strong>Compare typefaces</strong><a href="fonts.html">View samples →</a></div><div class="font-buttons">'+''.join(f'<button type="button" data-font-choice="{key}" aria-pressed="false">{e(name)}</button>' for key,name,_ in FONTS)+'</div><p id="font-description" role="status" aria-live="polite"></p></aside>'
-    s=head(title,description or 'Academic website of Jinzhen Wang at UNC Charlotte. Research, publications, news, and teaching.',design,asset)
+    document_title = profile['lab'] if lab_page else (f"{profile['name']} | {profile['role'].capitalize()}, {profile['university']}" if filename == 'index.html' else f"{title} · {profile['name']}")
+    s=head(document_title,description or 'Academic website of Jinzhen Wang at UNC Charlotte. Research, publications, news, and teaching.',design,asset)
     if filename=='fonts.html': s=s.replace(f'<link rel="stylesheet" href="{asset}design.css">','')
     shell='page-shell lab-shell' if lab_page else ('page-shell single-column' if design=='classic' else 'page-shell')
     side=sidebar(asset) if design=='editorial' and not lab_page else ''
@@ -136,15 +137,16 @@ for key,label,description in [('kai','楷体','Regular script · LXGW WenKai'),(
 fontbody+='</div></section>'
 for key,name,desc in FONTS:
     fontbody+=f'''<section class="font-sample" data-font="{key}"><div class="font-sample-label"><span>{e(name)}</span>{link('Preview full website →','index.html?font='+key+'&preview=fonts')}</div><h2>Jinzhen Wang</h2><h3>High-performance computing & scientific data</h3><p>I lead the High-Performance Data Intensive Lab at UNC Charlotte. My research focuses on data reduction, compression, and parallel and distributed systems.</p><p class="sample-paper">DeepCQ: A Two-Stage Deep-Surrogate Framework for Lossy Compression Quality Prediction</p><p class="font-sample-description">{e(desc)}</p></section>'''
-labbody=f'''<section class="lab-hero" id="lab-overview"><h1>{e(profile['lab'])}</h1><p class="lab-mission">{e(lab['mission'])}</p></section>'''
+lab_about=e(lab['mission']).replace(e(profile['name']),link(profile['name'],'index.html'),1)
+labbody=f'''<section class="lab-hero" id="lab-overview"><h1>{e(profile['lab'])}</h1><p class="lab-mission">{lab_about}</p></section>'''
 themes='<div class="research-themes">'+''.join(f'<article><h3>{e(x["title"])}</h3><p>{e(x["description"])}</p></article>' for x in lab['research'])+'</div>'
 labbody+=section('Research',themes,anchor='research')+section('Projects',project_content,anchor='projects')
-directory=f'''<article class="person pi-person"><h3>{link(profile['name'],'index.html')}</h3><p class="person-role">Principal Investigator</p><p>{e(profile['role'])}, Computer Science · UNC Charlotte</p></article>'''
+directory='<div class="people-group"><h3>Faculty</h3><div class="people-grid">'
+directory+=f'<article class="person"><h4>{link(profile["name"],"index.html")}</h4><p class="person-role">Principal Investigator</p><p>{e(profile["role"])}, Computer Science · UNC Charlotte</p></article></div></div>'
 for group in ['Students','Alumni','Collaborators']:
     members=[p for p in people if p.get('group')==group]
-    if not members and group!='Students':continue
-    directory+=f'<div class="people-group"><h3>{group}</h3>'
-    if not members:directory+='<p class="pending-roster">Student profiles will be added here.</p>'
+    if not members:continue
+    directory+=f'<div class="people-group"><h3>{group}</h3><div class="people-grid">'
     for person in members:
         name=link(person['name'],person['url']) if person.get('url') else e(person['name'])
         directory+=f'<article class="person"><h4>{name}</h4><p class="person-role">{e(person["role"])}</p>'
@@ -152,9 +154,8 @@ for group in ['Students','Alumni','Collaborators']:
         if person.get('topic'):directory+=f'<p>{e(person["topic"])}</p>'
         if person.get('joined'):directory+=f'<p class="person-detail">Joined {e(person["joined"])}</p>'
         directory+='</article>'
-    directory+='</div>'
+    directory+='</div></div>'
 labbody+=section('People',directory,anchor='people')
-labbody+=section('Join the lab',f'<p>{e(lab["recruiting"])}</p>'+link('Contact '+profile['name']+' →','mailto:'+profile['email']),anchor='join')
 def sponsor_logo(sponsor,asset=None):
     if not sponsor.get('logo'):return ''
     prefix=asset or '__SPONSOR_ASSET__'

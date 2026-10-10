@@ -42,7 +42,7 @@ html[data-portrait="right"] .home-profile>div,html[data-portrait="right"] .intro
 @media print{body .news-scroll{max-height:none;overflow:visible}body .portrait{width:120px;height:120px}}
 
 /* Shared institutional header and one-row profile controls. */
-body .institution-logos{display:flex;align-items:center;gap:16px;flex:0 0 auto;max-width:100%;padding:6px 10px;background:#fff;border-radius:3px}
+body .institution-logos{display:flex;align-items:center;gap:16px;flex:0 0 auto;max-width:100%;padding:0;background:#fff;border-radius:3px}
 body .institution-logo{display:flex;align-items:center;flex:0 0 auto;text-decoration:none}
 body .institution-logo img{display:block;object-fit:contain;width:auto;height:auto;max-width:100%}
 body .university-logo img{width:128px}
@@ -55,7 +55,7 @@ body .profile-controls:focus-visible{outline:2px solid var(--accent);outline-off
 body .profile-controls>a,body .profile-controls>span{display:inline-flex;align-items:center;flex:0 0 auto;white-space:nowrap;overflow-wrap:normal;font-family:var(--d-nav-font);font-size:var(--d-body-size)!important;line-height:1.5;padding:5px 10px;min-height:36px;background:var(--accent-soft);color:var(--ink);border:1px solid var(--line);border-radius:4px}
 body .profile-controls .profile-button{font-weight:600;color:var(--accent)}
 body .profile-controls>a:hover{border-color:var(--accent);text-decoration:none}
-@media(max-width:700px){body .institution-logos{gap:12px;padding:5px 8px}body .university-logo img{width:112px}body .college-logo img{width:144px}body .site-header #site-nav{order:4;width:100%}body .site-header .nav{order:4;width:100%;overflow-x:auto;flex-wrap:nowrap}body .profile-controls{margin-top:10px}}
+@media(max-width:700px){body .institution-logos{gap:12px;padding:0}body .university-logo img{width:112px}body .college-logo img{width:144px}body .site-header #site-nav{order:4;width:100%}body .site-header .nav{order:4;width:100%;overflow-x:auto;flex-wrap:nowrap}body .profile-controls{margin-top:10px}}
 @media print{body .profile-controls{overflow:visible;max-width:none}}
 
 body .site-header .menu-toggle,body .site-header .theme-toggle{margin-left:0;margin-inline-start:0}
@@ -63,3 +63,14 @@ body .site-header .menu-toggle,body .site-header .theme-toggle{margin-left:0;mar
 /* Institutional logos stay left; navigation and theme control stay right. */
 body .site-header .institution-logos{margin-inline-end:auto}
 body .site-footer .last-update{display:inline}
+
+/* Shared, evenly aligned lab directory; no profile dividers. */
+body #people .section-heading{border-bottom:0}
+body #people .people-group{margin-top:24px}
+body #people .people-group>h3{margin:0 0 16px}
+body #people .people-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 28px;align-items:start}
+body #people .person{display:block;padding:0;border:0;min-width:0}
+body #people .person h4{margin:0 0 6px;line-height:1.4}
+body #people .person p{margin:4px 0;overflow-wrap:anywhere}
+@media(max-width:850px){body #people .people-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){body #people .people-grid{grid-template-columns:1fr}}

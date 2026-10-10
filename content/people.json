@@ -31,5 +31,25 @@
     "url": "",
     "source_url": "https://sites.google.com/charlotte.edu/hpdilab/team",
     "approved": true
+  },
+  {
+    "name": "Aagat Pokhrel",
+    "role": "Team member",
+    "group": "Students",
+    "bio": "",
+    "topic": "",
+    "joined": "",
+    "url": "",
+    "approved": true
+  },
+  {
+    "name": "Adelina Zheng",
+    "role": "Summer REU student",
+    "group": "Alumni",
+    "bio": "Undergraduate student at Brown University.",
+    "topic": "",
+    "joined": "",
+    "url": "",
+    "approved": true
   }
 ]

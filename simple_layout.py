@@ -62,10 +62,11 @@ def render(out, profile, settings, lab, news, papers, teaching, projects, people
             if switch:
                 nav.append('<span class="nav-divider" aria-hidden="true"></span>')
             nav.append(f'<a href="{esc(url)}"'+(' class="nav-switch"' if switch else '')+(' aria-current="page"' if url == filename else '')+f'>{esc(item["label"])}</a>')
+        document_title = profile['lab'] if lab_page else (f"{profile['name']} | {profile['role'].capitalize()}, {profile['university']}" if filename == 'index.html' else f"{title} · {profile['name']}")
         identity = profile['lab'] if lab_page else profile['name']
         compact_styles = '<link rel="stylesheet" href="../assets/compact.css">' if compact else ''
         demo_links = '<p class="demo-links">Other demos: <a href="../index.html">Classic</a> · <a href="../simple/index.html">Simple</a> · <a href="../editorial/index.html">Editorial</a></p>' if compact else ''
-        result = f'''<!doctype html><html lang="en" data-portrait="{esc(design_settings['layout']['portrait_position'])}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{esc(title)} · {esc(profile['name'])}</title><meta name="description" content="Academic website of Jinzhen Wang and HPDi Lab at UNC Charlotte."><meta name="theme-color" content="{esc(palette['accent'])}"><link rel="icon" href="../assets/simple-mark.svg" type="image/svg+xml"><link rel="preload" href="../assets/fonts/texgyrepagella-regular.woff" as="font" type="font/woff" crossorigin><script src="../assets/theme.js"></script><script src="../assets/name-fonts.js" defer></script><link rel="stylesheet" href="../assets/colors.css"><link rel="stylesheet" href="../assets/simple.css"><link rel="stylesheet" href="../assets/theme.css"><link rel="stylesheet" href="../assets/sponsors.css">{compact_styles}<link rel="stylesheet" href="../assets/design-tokens.css"><link rel="stylesheet" href="../assets/design.css"></head><body data-layout="{variant}"><a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="wrap header-row"><div class="institution-logos" aria-label="College of Computing and Informatics"><a class="institution-logo college-logo" href="https://cci.charlotte.edu/"><img src="../assets/logos/cci.png" alt="College of Computing and Informatics" width="288" height="115"></a></div><nav class="nav" aria-label="{'Lab' if lab_page else 'Main'}">{''.join(nav)}</nav><button class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" hidden><svg class="theme-icon theme-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg><svg class="theme-icon theme-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42m0-14.14-1.42 1.42M6.35 17.65l-1.42 1.42"/></svg></button></div></header><main id="main" class="wrap">{body}</main><footer class="site-footer"><div class="wrap footer-row"><address><strong>{esc(identity)}</strong><br>{esc(profile['department'])}<br>{esc(profile['university'])}</address><p class="footer-meta">{esc(profile['lab_name'])}<br>Last update: {esc(profile['updated'])}</p>{demo_links}</div></footer></body></html>'''
+        result = f'''<!doctype html><html lang="en" data-portrait="{esc(design_settings['layout']['portrait_position'])}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{esc(document_title)}</title><meta name="description" content="Academic website of Jinzhen Wang and HPDi Lab at UNC Charlotte."><meta name="theme-color" content="{esc(palette['accent'])}"><link rel="icon" href="../assets/simple-mark.svg" type="image/svg+xml"><link rel="preload" href="../assets/fonts/texgyrepagella-regular.woff" as="font" type="font/woff" crossorigin><script src="../assets/theme.js"></script><script src="../assets/name-fonts.js" defer></script><link rel="stylesheet" href="../assets/colors.css"><link rel="stylesheet" href="../assets/simple.css"><link rel="stylesheet" href="../assets/theme.css"><link rel="stylesheet" href="../assets/sponsors.css">{compact_styles}<link rel="stylesheet" href="../assets/design-tokens.css"><link rel="stylesheet" href="../assets/design.css"></head><body data-layout="{variant}"><a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="wrap header-row"><div class="institution-logos" aria-label="College of Computing and Informatics"><a class="institution-logo college-logo" href="https://cci.charlotte.edu/"><img src="../assets/logos/cci.png" alt="College of Computing and Informatics" width="288" height="115"></a></div><nav class="nav" aria-label="{'Lab' if lab_page else 'Main'}">{''.join(nav)}</nav><button class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" hidden><svg class="theme-icon theme-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg><svg class="theme-icon theme-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42m0-14.14-1.42 1.42M6.35 17.65l-1.42 1.42"/></svg></button></div></header><main id="main" class="wrap">{body}</main><footer class="site-footer"><div class="wrap footer-row"><address><strong>{esc(identity)}</strong><br>{esc(profile['department'])}<br>{esc(profile['university'])}</address><p class="footer-meta">{esc(profile['lab_name'])}<br>Last update: {esc(profile['updated'])}</p>{demo_links}</div></footer></body></html>'''
         (folder / filename).write_text(result)
 
     bio = ''.join(f'<p>{esc(p)}</p>' for p in profile['bio'])
@@ -90,9 +91,10 @@ def render(out, profile, settings, lab, news, papers, teaching, projects, people
     page('teaching.html', 'Teaching', '<h1 class="page-title">Teaching</h1>' + courses)
     page('about.html', 'About', '<h1 class="page-title">About</h1><div class="prose">' + bio + '</div><h2>Research interests</h2><p>' + esc(', '.join(profile['interests'])) + '</p>')
 
-    body = f'<section class="lab-hero" id="lab-overview"><h1 class="page-title">{esc(profile["lab"])}</h1><p class="lede">{esc(lab["mission"])}</p></section>' + motif
+    lab_about = esc(lab['mission']).replace(esc(profile['name']), link(profile['name'], 'index.html'), 1)
+    body = f'<section class="lab-hero" id="lab-overview"><h1 class="page-title">{esc(profile["lab"])}</h1><p class="lede">{lab_about}</p></section>' + motif
     if compact:
-        body = f'<section class="lab-hero" id="lab-overview"><h1 class="page-title">{esc(profile["lab"])}</h1><p class="lede">{esc(lab["mission"])}</p></section>'
+        body = f'<section class="lab-hero" id="lab-overview"><h1 class="page-title">{esc(profile["lab"])}</h1><p class="lede">{lab_about}</p></section>'
     body += '<section id="research"><h2>Research</h2><div class="research-list">'
     for theme in lab['research']:
         body += f'<div class="thrust"><div><h3>{esc(theme["title"])}</h3><p>{esc(theme["description"])}</p></div></div>'
@@ -100,24 +102,22 @@ def render(out, profile, settings, lab, news, papers, teaching, projects, people
     for project in projects:
         context = f'<p class="project-context">{esc(project["context"])}</p>' if compact and project.get('context') else ''
         body += f'<div class="thrust"><div><h3>{esc(project["name"])}</h3>{context}<p>{esc(project["description"])}</p><p class="links">'+''.join(link(x['label'], x['url']) for x in project.get('links', []))+'</p></div></div>'
-    body += f'</section><section id="people"><h2>People</h2><div class="people"><div class="person person-lead"><img class="avatar" src="../assets/jinzhen-wang.jpg" alt="Jinzhen Wang" width="112" height="112"><div><p class="person-name">{link(profile["name"], "index.html")}</p><p class="person-role">Director; {esc(profile["role"])}</p></div></div></div>'
+    body += f'</section><section id="people"><h2>People</h2><div class="people-group"><h3>Faculty</h3><div class="people-grid"><article class="person"><h4>{link(profile["name"],"index.html")}</h4><p class="person-role">Principal Investigator</p><p>{esc(profile["role"])}, Computer Science · UNC Charlotte</p></article></div></div>'
     for group in ['Students', 'Alumni', 'Collaborators']:
         members = [p for p in people if p.get('group', 'Students') == group]
-        if group != 'Students' and not members:
-            continue
-        body += f'<h3>{group}</h3>'
         if not members:
-            body += '<p class="placeholder">Student profiles will be added here.</p>'
+            continue
+        body += f'<div class="people-group"><h3>{group}</h3><div class="people-grid">'
         for person in members:
             name = link(person['name'], person['url']) if person.get('url') else esc(person['name'])
-            body += f'<div class="person-text"><p class="person-name">{name}</p><p class="person-role">{esc(person["role"])}</p>'
+            body += f'<article class="person"><h4>{name}</h4><p class="person-role">{esc(person["role"])}</p>'
             if person.get('bio'):
                 body += f'<p class="person-bio">{esc(person["bio"])}</p>'
             if person.get('topic'):
                 body += f'<p>{esc(person["topic"])}</p>'
-            body += '</div>'
+            body += '</article>'
+        body += '</div></div>'
     body += '</section>'
-    body += '<section id="join"><h2>Join us</h2><p>' + esc(lab['recruiting']) + '</p><p>' + link(profile['email'], 'mailto:' + profile['email']) + '</p></section>'
     body += '<section id="sponsors"><h2>Sponsors</h2><div class="sponsor-grid">'
     for sponsor in lab.get('sponsors', []):
         logo = f'<a class="sponsor-logo-panel" href="{esc(sponsor["url"])}"><img src="../assets/{esc(sponsor["logo"])}" alt="{esc(sponsor["name"])} logo" width="240" height="96" loading="lazy"></a>' if sponsor.get('logo') else ''
