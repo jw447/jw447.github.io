@@ -4,7 +4,6 @@
     "name": "Compression Quality Prediction",
     "subtitle": "DeepCQ and QualityNet",
     "description": "We develop deep surrogate models that estimate the quality of scientific lossy compression and support informed configuration choices. QualityNet studies error-bounded compression quality prediction. DeepCQ extends this direction with a modular two-stage framework that reuses extracted features across compressors, quality metrics, and scientific datasets.",
-    "context": "IEEE Cluster 2026 · IEEE BigData 2024",
     "links": [
       {
         "label": "DeepCQ preprint",

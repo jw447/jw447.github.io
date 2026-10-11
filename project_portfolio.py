@@ -4,11 +4,11 @@ from html import escape as e
 def project_cards(projects):
     cards = []
     for p in projects:
-        cards.append(f'<a class="portfolio-card" href="project-{e(p["id"])}.html"><span class="portfolio-context">{e(p["context"])}</span><h3>{e(p["name"])}</h3><p>{e(p["subtitle"])}</p><span class="portfolio-more">Explore project →</span></a>')
+        cards.append(f'<a class="portfolio-card" href="project-{e(p["id"])}.html"><h3>{e(p["name"])}</h3><p>{e(p["subtitle"])}</p><span class="portfolio-more">Explore project →</span></a>')
     return '<div class="portfolio-grid">'+''.join(cards)+'</div>'
 
 def project_detail(p, papers=()):
-    body = f'<a href="lab.html#projects">← All projects</a><header class="project-introduction"><p>{e(p["context"])}</p><h1>{e(p["name"])}</h1></header><section class="project-detail-section"><h2>Overview</h2><p>{e(p["description"])}</p></section>'
+    body = f'<a href="lab.html#projects">← All projects</a><header class="project-introduction"><h1>{e(p["name"])}</h1></header><section class="project-detail-section"><h2>Overview</h2><p>{e(p["description"])}</p></section>'
     related = [paper for paper in papers if paper['id'] in p.get('publication_ids', [])]
     if related:
         body += '<section class="project-detail-section"><h2>Publications</h2>'

@@ -43,7 +43,6 @@ SECTIONS = [
     dict(key='projects', label='Projects', path=['projects'], list=True, fields=[
         field('publication_ids', 'Publication IDs (one per line)', 'lines', required=False),
         field('name', 'Project name', required=True), field('subtitle', 'Subtitle', required=True),
-        field('context', 'Venue / program / year', required=True),
         field('description', 'Description', 'textarea', True),
         field('people', 'Collaborators', 'textarea'), field('links', 'Project links', 'records', fields=LINKS),
     ]),

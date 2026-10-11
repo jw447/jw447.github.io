@@ -41,7 +41,7 @@
       const node = button('', () => { index = i; renderForm(); updateRecordLabels(); });
       node.setAttribute('aria-current', String(i === index));
       node.append(text('strong', recordTitle(record)));
-      node.append(text('small', record.date || (record.short ? `${record.short} · ${record.year}` : record.context || record.group || record.terms || '')));
+      node.append(text('small', record.date || (record.short ? `${record.short} · ${record.year}` : record.group || record.terms || '')));
       $('record-list').append(node);
     });
     if (!$('record-list').children.length) $('record-list').append(text('p', records().length ? 'No matching entries.' : 'No entries yet. Add your first one.', 'empty'));
