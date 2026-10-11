@@ -2,7 +2,7 @@
 
 from .design import GROUPS
 
-CONTENT_NAMES = ('profile', 'news', 'publications', 'teaching', 'projects', 'people', 'lab', 'site', 'compact', 'design')
+CONTENT_NAMES = ('profile', 'news', 'publications', 'teaching', 'projects', 'people', 'lab', 'site', 'design')
 
 
 def field(key, label, kind='text', required=False, **options):
@@ -19,11 +19,9 @@ SECTIONS = [
         field('university', 'University', required=True), field('email', 'Email', 'email', True),
         field('office', 'Room / location'), field('lab', 'Lab short name', required=True),
         field('lab_name', 'Lab full name', required=True), field('bio', 'Biography', 'paragraphs', True),
-        field('bio', 'Short biography for the compact demo', 'paragraphs', True, store='compact'),
         field('interests', 'Research interests — one per line', 'lines', True),
-        field('scholar', 'Google Scholar', 'url', True), field('cv', 'Curriculum vitae', 'url', True),
+        field('scholar', 'Google Scholar', 'url', True), field('cv', 'Curriculum vitae (PDF)', 'pdf', True),
         field('github', 'Lab GitHub', 'url', True), field('site_url', 'Personal site URL', 'url', True),
-        field('updated', 'Updated label', required=True),
     ]),
     dict(key='news', label='News', path=['news'], list=True, fields=[
         field('date', 'Month', 'month', True), field('kind', 'Category', required=True),
@@ -33,6 +31,7 @@ SECTIONS = [
         field('title', 'Paper title', 'textarea', True), field('year', 'Publication year', 'number', True),
         field('short', 'Venue abbreviation', required=True), field('venue', 'Full venue name', required=True),
         field('authors', 'Authors — comma separated', 'textarea', True),
+        field('doi', 'DOI (for citation lookup)'), field('bibtex', 'Publisher BibTeX', 'textarea'),
         field('note', 'Optional note', 'textarea'), field('selected', 'Mark as selected', 'checkbox'),
         field('links', 'Paper links', 'records', fields=LINKS),
     ]),
@@ -46,7 +45,6 @@ SECTIONS = [
         field('name', 'Project name', required=True), field('subtitle', 'Subtitle', required=True),
         field('context', 'Venue / program / year', required=True),
         field('description', 'Description', 'textarea', True),
-        field('compact_description', 'Short description for the compact demo', 'compact'),
         field('people', 'Collaborators', 'textarea'), field('links', 'Project links', 'records', fields=LINKS),
     ]),
     dict(key='people', label='People', path=['people'], list=True, fields=[

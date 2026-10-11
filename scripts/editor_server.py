@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Run the optional loopback-only editor: python3 scripts/editor_server.py."""
 import argparse
+import base64
+import binascii
+from zoneinfo import ZoneInfo
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -19,6 +22,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from editor.content import bundle, read_content, revision, validate
 from editor.schema import CONTENT_NAMES
+from editor.change_summary import summarize_changes
+from bibliography import lookup as lookup_citation
+
+PUBLISH_BRANCH = "local-design"
+CV_PATH = "assets/cv/jinzhen-wang.pdf"
 
 
 class EditorError(Exception):
@@ -28,8 +36,9 @@ class EditorError(Exception):
 
 
 class Editor:
-    def __init__(self, root):
+    def __init__(self, root, allow_design=False):
         self.root = root.resolve()
+        self.allow_design = allow_design
         self.preview = None
         self.lock = threading.Lock()
         self.token = secrets.token_urlsafe(32)
@@ -54,18 +63,22 @@ class Editor:
             if not self.github_remote(remote):
                 return dict(ready=False, reason='Publishing needs a GitHub origin remote. Preview and saving are available.')
             branch = self.git('branch', '--show-current')
-            if branch != 'main':
-                return dict(ready=False, reason='Switch to the main branch to publish; other branches support preview and saving.')
+            if branch != PUBLISH_BRANCH:
+                return dict(ready=False, reason='Start with python3 edit.py to synchronize and publish local-design.')
             return dict(ready=True, repository=remote, branch=branch)
         except (EditorError, subprocess.TimeoutExpired, FileNotFoundError):
             return dict(ready=False, reason='Publishing needs Git and a local checkout of the GitHub website repository.')
 
-    def candidate(self, payload):
+    def candidate(self, payload, publishing=False):
         if not isinstance(payload, dict) or payload.get('schema_version') != 1:
             raise EditorError('Import an editor content package, version 1.')
         baseline = read_content(self.root)
         if payload.get('base_revision') != revision(baseline):
             raise EditorError('The source content changed since this draft was loaded. Download your draft, then load the current content before applying it.', 409)
+        if not self.allow_design and isinstance(payload.get('content'), dict) and payload['content'].get('design') != baseline['design']:
+            raise EditorError('The content editor cannot change design. Import design XML separately.')
+        if not publishing and isinstance(payload.get('content'), dict) and isinstance(payload['content'].get('profile'), dict):
+            payload['content']['profile']['updated'] = baseline['profile']['updated']
         errors = validate(payload.get('content'), baseline)
         if errors:
             raise EditorError('Please fix the highlighted content fields.', errors=errors)
@@ -75,15 +88,14 @@ class Editor:
         temporary = tempfile.TemporaryDirectory(prefix='hpdi-editor-')
         folder = Path(temporary.name)
         try:
-            shutil.copytree(self.root / 'content', folder / 'content')
+            # Use the same source tree as deployment, including future renderers.
+            # Exclude generated output, repository state and local-only data.
+            ignored = shutil.ignore_patterns('.git', '.openai', 'dist', '.editor-state',
+                                            '__pycache__', '.DS_Store', '._*',
+                                            '.venv', 'venv', 'node_modules', '.env', '.env.*')
+            shutil.copytree(self.root, folder, dirs_exist_ok=True, ignore=ignored)
             for name in CONTENT_NAMES:
                 (folder / 'content' / f'{name}.json').write_text(json.dumps(data[name], ensure_ascii=False, indent=2) + '\n')
-            for source in ('build.py', 'simple_layout.py', 'publication_format.py', 'person_cards.py', 'project_portfolio.py'):
-                shutil.copy2(self.root / source, folder / source)
-            shutil.copytree(self.root / 'editor', folder / 'editor', ignore=shutil.ignore_patterns('__pycache__'))
-            shutil.copytree(self.root / 'assets', folder / 'assets')
-            (folder / 'scripts').mkdir()
-            shutil.copy2(self.root / 'scripts/check_site.py', folder / 'scripts/check_site.py')
             for script in ('build.py', 'scripts/check_site.py'):
                 result = subprocess.run([sys.executable, script], cwd=folder, capture_output=True, text=True, timeout=45)
                 if result.returncode:
@@ -98,10 +110,10 @@ class Editor:
         previous = self.preview
         self.preview = temporary
         if previous: previous.cleanup()
-        return dict(ok=True, preview_url='/preview/compact/index.html')
+        return dict(ok=True, preview_url='/preview/index.html')
 
-    def save(self, payload):
-        data = self.candidate(payload)
+    def save(self, payload, publishing=False):
+        data = self.candidate(payload, publishing=publishing)
         temporary = self.build_preview(data)
         current = read_content(self.root)
         # Recheck after the build in case an assistant or another editor changed files.
@@ -126,41 +138,71 @@ class Editor:
         temporary.cleanup()
         return dict(ok=True, bundle=bundle(self.root), changed=changed)
 
+    def lookup_bibtex(self, payload):
+        try: return lookup_citation(payload['paper'])
+        except Exception as error:
+            raise EditorError('Citation lookup failed. Check the DOI or paste the publisher BibTeX export. ' + str(error))
+
+    def upload_cv(self, payload):
+        if payload.get('base_revision') != revision(read_content(self.root)):
+            raise EditorError('Content changed; reload the editor before uploading.', 409)
+        try: raw = base64.b64decode(payload.get('data', ''), validate=True)
+        except (ValueError, binascii.Error): raise EditorError('Choose a valid PDF file.')
+        if not 0 < len(raw) <= 10 * 1024 * 1024 or not raw.startswith(b'%PDF-') or b'%%EOF' not in raw[-2048:]:
+            raise EditorError('Choose a PDF file of at most 10 MB.')
+        target = self.root / CV_PATH
+        if target.exists():
+            backup = self.state / 'backups' / datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+            backup.mkdir(parents=True); shutil.copy2(target, backup / 'cv.pdf')
+        target.parent.mkdir(parents=True, exist_ok=True)
+        stage = target.with_suffix('.pdf.editor-tmp'); stage.write_bytes(raw); stage.replace(target)
+        return dict(ok=True, path=CV_PATH)
+
     def publish(self, payload):
         status = self.publishing_status()
         if not status['ready']: raise EditorError(status['reason'], 409)
-        outside = self.git('diff', '--name-only', 'HEAD').splitlines()
-        allowed = {f'content/{name}.json' for name in CONTENT_NAMES}
+        outside = self.git('diff', '--name-only', 'HEAD').splitlines() + self.git('ls-files', '--others', '--exclude-standard').splitlines()
+        allowed = {f'content/{name}.json' for name in CONTENT_NAMES if name != 'design'} | {CV_PATH}
         if any(path not in allowed and not path.startswith('dist/') for path in outside):
             raise EditorError('There are code or layout changes outside the editor. Commit or discard them separately before publishing content.', 409)
         if self.pending_path.exists():
             pending = json.loads(self.pending_path.read_text())
+            if pending.get('branch', PUBLISH_BRANCH) != PUBLISH_BRANCH:
+                raise EditorError('The pending commit targets another branch. Push it manually before continuing.', 409)
             if self.git('rev-parse', 'HEAD') != pending['commit'] or outside:
                 raise EditorError('A previous publish needs attention. Finish pushing its commit before making another content publish.', 409)
             if revision(self.candidate(payload)) != revision(read_content(self.root)):
                 raise EditorError('Push the previous saved commit before publishing this new draft.', 409)
         else:
-            self.git('fetch', 'origin', 'main', timeout=45)
-            if self.git('rev-parse', 'HEAD') != self.git('rev-parse', 'origin/main'):
-                raise EditorError('Local and GitHub history differ. Synchronize the main branch before publishing.', 409)
-            saved = self.save(payload)
-            paths = [f'content/{name}.json' for name in CONTENT_NAMES] + ['dist']
+            self.git('fetch', 'origin', timeout=45)
+            remote_ref = 'refs/remotes/origin/' + PUBLISH_BRANCH
+            exists = subprocess.run(['git', '-C', str(self.root), 'show-ref', '--verify', '--quiet', remote_ref]).returncode == 0
+            if exists and subprocess.run(['git', '-C', str(self.root), 'merge-base', '--is-ancestor', remote_ref, 'HEAD']).returncode != 0:
+                raise EditorError('Local and GitHub history differ. Reconcile local-design with origin/local-design before publishing.', 409)
+            committed_content = {name: json.loads(self.git('show', f'HEAD:content/{name}.json')) for name in CONTENT_NAMES}
+            payload = json.loads(json.dumps(payload))
+            payload['content']['profile']['updated'] = datetime.now(ZoneInfo('America/New_York')).strftime('%B %-d, %Y')
+            saved = self.save(payload, publishing=True)
+            paths = [f'content/{name}.json' for name in CONTENT_NAMES if name != 'design'] + ['dist']
+            if not self.git('ls-files', '--', 'dist'):
+                paths.remove('dist')  # GitHub Actions rebuilds ignored output from source.
+            if (self.root / CV_PATH).exists(): paths.append(CV_PATH)
             self.git('add', '--', *paths)
             if not self.git('diff', '--cached', '--name-only'):
                 return dict(ok=True, message='No content changes to publish.', bundle=saved['bundle'])
             try:
-                self.git('commit', '-m', 'Update website content through browser editor')
+                self.git('commit', '-m', summarize_changes(committed_content, read_content(self.root)) + ('\n- CV: upload PDF' if CV_PATH in self.git('diff', '--cached', '--name-only').splitlines() else ''))
             except EditorError:
                 raise EditorError('Content is saved locally, but Git could not create the commit. Check your Git name/email configuration.', 409, saved=True)
-            pending = dict(commit=self.git('rev-parse', 'HEAD'))
+            pending = dict(commit=self.git('rev-parse', 'HEAD'), branch=PUBLISH_BRANCH)
             self.state.mkdir(exist_ok=True)
             self.pending_path.write_text(json.dumps(pending))
         try:
-            self.git('push', 'origin', 'HEAD:main', timeout=45)
+            self.git('push', 'origin', 'HEAD:' + PUBLISH_BRANCH, timeout=45)
         except (EditorError, subprocess.TimeoutExpired):
             raise EditorError('The content commit is saved locally, but GitHub did not confirm the push. Check authentication/network and click Publish again to retry this commit.', 409, saved=True, committed=True, commit=pending['commit'], bundle=bundle(self.root))
         self.pending_path.unlink(missing_ok=True)
-        return dict(ok=True, commit=pending['commit'], bundle=bundle(self.root), message='Pushed to GitHub. The Pages workflow will build and deploy the update.')
+        return dict(ok=True, commit=pending['commit'], bundle=bundle(self.root), message='Pushed to local-design. Merge its pull request into main to update the live website.')
 
 
 def make_handler(editor):
@@ -210,11 +252,11 @@ def make_handler(editor):
                 return self.reply(dict(error='JSON content is required.'), 415)
             try: length = int(self.headers.get('Content-Length', '0'))
             except ValueError: return self.reply(dict(error='Invalid request size.'), 400)
-            if not 0 < length <= 1000000: return self.reply(dict(error='Content package is too large or empty.'), 413)
+            if not 0 < length <= (14000000 if urlparse(self.path).path == '/api/upload-cv' else 1000000): return self.reply(dict(error='Content package is too large or empty.'), 413)
             if not editor.lock.acquire(blocking=False): return self.reply(dict(error='Another editor operation is running. Try again when it finishes.'), 409)
             try:
                 payload = json.loads(self.rfile.read(length))
-                action = {'/api/preview': editor.preview_content, '/api/save': editor.save, '/api/publish': editor.publish}.get(urlparse(self.path).path)
+                action = {'/api/preview': editor.preview_content, '/api/save': editor.save, '/api/publish': editor.publish, '/api/upload-cv': editor.upload_cv, '/api/bibtex': editor.lookup_bibtex}.get(urlparse(self.path).path)
                 if not action: raise EditorError('Unknown editor action.', 404)
                 self.reply(action(payload))
             except EditorError as error: self.reply(dict(error=str(error), **error.extra), error.status)
@@ -228,12 +270,17 @@ def make_handler(editor):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=8765)
+    parser.add_argument('--open', action='store_true', help='Open the local editor in your browser')
     args = parser.parse_args()
-    if not (ROOT / 'dist/admin/index.html').exists():
-        subprocess.run([sys.executable, str(ROOT / 'build.py')], check=True)
+    # Always refresh the editor and pages from the current checkout.
+    subprocess.run([sys.executable, str(ROOT / 'build.py')], check=True)
+    subprocess.run([sys.executable, str(ROOT / 'scripts/check_site.py')], check=True)
     editor = Editor(ROOT)
     server = ThreadingHTTPServer(('127.0.0.1', args.port), make_handler(editor))
     print(f'Open http://127.0.0.1:{server.server_port}/admin/ in your browser. Ctrl+C stops the editor.', flush=True)
+    if args.open:
+        import webbrowser
+        webbrowser.open(f'http://127.0.0.1:{server.server_port}/admin/')
     try: server.serve_forever()
     except KeyboardInterrupt: pass
     finally:

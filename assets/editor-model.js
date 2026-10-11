@@ -22,7 +22,7 @@
     function fields(record, definitions, prefix) {
       if (!record || typeof record !== 'object' || Array.isArray(record)) { errors.push(`${prefix}: invalid record.`); return; }
       for (const field of definitions) {
-        if (field.store || field.type === 'compact') continue;
+        if (field.store) continue;
         const value = record[field.key]; const name = `${prefix} — ${field.label}`;
         if (field.required && (value == null || (typeof value === 'string' && !value.trim()) || (Array.isArray(value) && !value.length))) { errors.push(`${name}: required.`); continue; }
         if (value == null) continue;
@@ -36,6 +36,7 @@
             break;
           default:
             if (typeof value !== 'string' || value.length > 20000) errors.push(`${name}: invalid text.`);
+            else if (field.type === 'pdf' && value !== 'assets/cv/jinzhen-wang.pdf' && !validURL(value)) errors.push(`${name}: upload a PDF.`);
             else if (field.type === 'url' && !validURL(value)) errors.push(`${name}: use a complete http(s) URL.`);
             else if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errors.push(`${name}: enter a valid email.`);
             else if (field.type === 'month' && !/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) errors.push(`${name}: enter YYYY-MM.`);
@@ -64,14 +65,12 @@
       for (const key of keys) if (!equal(data[name]?.[key], baseline[name]?.[key])) errors.push(`${name}: navigation and design settings cannot be changed through this editor.`);
     }
     if (!Array.isArray(data.site?.student_authors) || !data.site.student_authors.every(x => typeof x === 'string' && x.trim())) errors.push('Student author names must be non-empty text.');
-    if (!Array.isArray(data.compact?.bio) || !data.compact.bio.length || !data.compact.bio.every(x => typeof x === 'string' && x.trim())) errors.push('Compact biography is required.');
-    if (!data.compact?.projects || Array.isArray(data.compact.projects) || typeof data.compact.projects !== 'object' || !Object.values(data.compact.projects).every(x => typeof x === 'string')) errors.push('Compact project descriptions must be text.');
     return errors;
   }
   function newRecord(section) {
     const record = {};
     for (const field of section.fields) {
-      if (field.store || field.type === 'compact') continue;
+      if (field.store) continue;
       record[field.key] = field.type === 'checkbox' ? false : field.type === 'number' ? new Date().getFullYear() : ['records', 'lines', 'paragraphs'].includes(field.type) ? [] : field.type === 'select' ? field.choices[0] : '';
     }
     if (['publications', 'projects'].includes(section.key)) record.id = `${section.key === 'publications' ? 'paper' : 'project'}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

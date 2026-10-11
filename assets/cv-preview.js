@@ -9,9 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
  let opener;
  links.forEach(link => {
   const match = new URL(link.href).pathname.match(/^\/file\/d\/([a-zA-Z0-9_-]+)\//);
-  if (!match || new URL(link.href).hostname !== 'drive.google.com') return;
+  const localPDF = new URL(link.href).origin === location.origin && new URL(link.href).pathname.endsWith('.pdf');
+  if (!localPDF && (!match || new URL(link.href).hostname !== 'drive.google.com')) return;
   link.setAttribute('aria-haspopup', 'dialog');
-  link.addEventListener('click', event => { event.preventDefault(); opener = link; dialog.querySelector('iframe').src = 'https://drive.google.com/file/d/' + match[1] + '/preview'; dialog.showModal(); });
+  link.addEventListener('click', event => { event.preventDefault(); opener = link; dialog.querySelector('iframe').src = localPDF ? link.href : 'https://drive.google.com/file/d/' + match[1] + '/preview'; dialog.showModal(); });
  });
  dialog.querySelector('button').addEventListener('click', () => dialog.close());
  dialog.addEventListener('close', () => { dialog.querySelector('iframe').removeAttribute('src'); opener?.focus(); });

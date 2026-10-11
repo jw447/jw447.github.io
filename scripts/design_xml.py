@@ -21,7 +21,7 @@ def main():
             if args.file.stat().st_size > MAX_XML_BYTES:
                 raise ValueError('Choose a design XML file smaller than 64 KiB.')
             payload['content']['design'] = from_xml(args.file.read_text(encoding='utf-8-sig'))
-            result = Editor(ROOT).save(payload)
+            result = Editor(ROOT, allow_design=True).save(payload)
             print('Saved and checked: ' + (', '.join(result['changed']) or 'no changes'))
     except (EditorError, ValueError, OSError) as error:
         parser.exit(1, str(error) + '\n')

@@ -1,0 +1,43 @@
+name: Stamp review update date
+on:
+  push:
+    branches: [local-design]
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: stamp-local-design
+  cancel-in-progress: true
+jobs:
+  stamp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: local-design
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Record the push workflow date
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }} --jq .created_at > /tmp/review-push-date
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          pushed = datetime.fromisoformat(Path('/tmp/review-push-date').read_text().strip().replace('Z', '+00:00'))
+          profile = Path('content/profile.json')
+          data = json.loads(profile.read_text())
+          data['updated'] = pushed.astimezone(ZoneInfo('America/New_York')).strftime('%B %-d, %Y')
+          profile.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
+          PY
+          if ! git diff --quiet -- content/profile.json; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add content/profile.json
+            git commit -m 'Stamp last update for local-design push'
+            git push origin HEAD:local-design
+          fi
