@@ -99,3 +99,45 @@ publisher-deposited Crossref metadata; review it before saving. Google Scholar,
 IEEE and ACM BibTeX exports can also be pasted into the same field. The build
 uses that BibTeX, then verified DOI metadata, then a minimal local fallback.
 Only the current design is built; compact.json and retired demo assets are removed.
+
+## GitHub push confirmation
+
+The local editor checks GitHub on opening, every minute while visible, and via
+Check GitHub. Publish confirms that the saved commit is present in the remote
+local-design history, including when the date-stamping bot has added a newer
+commit. A successful Git command alone is not treated as confirmation.
+The status panel distinguishes confirmed, saved/unpublished, unpushed, behind,
+diverged and unconfirmed states, with a last-check time. Failed or uncertain
+pushes keep their pending commit for retry and show a reminder; closing the
+editor also warns about saved/unpushed or unconfirmed work. Reopening checks
+again. These reminders appear in the editor; no background/email reminder runs.
+
+## Embedded design assistant
+
+Choose Design changes in the local editor. Under API connection, enter your
+OpenAI API key and leave Remember on this computer checked to load it on restart.
+It is saved in .editor-state/openai-credentials.json with owner-only permissions,
+excluded from GitHub, previews and exports. Uncheck Remember and reconnect to
+remove the saved key. Alternatively set OPENAI_API_KEY before startup.
+The default model is gpt-5.4; OPENAI_DESIGN_MODEL can override it. Keys are never
+returned to the browser or stored in browser storage.
+You need your own OpenAI API account/billing. This is a separate API assistant,
+not a connection to an existing ChatGPT conversation or subscription.
+
+Describe the design change, inspect the proposed diff, then Preview proposal.
+Apply locally writes validated settings to content/design.json and styling to
+assets/assistant-design.css, with local backups. Content drafts are preserved.
+Publish applied design commits and pushes those reviewed files to local-design
+and verifies GitHub receipt. Publish saved content first if it is also modified;
+main is changed only by your own merge.
+
+The assistant receives current design settings, styles and rendered public
+Personal/Lab HTML, plus the design requests in this server session. It supports
+bounded settings and CSS, without executing generated scripts or rewriting
+Python templates. No files change merely by chatting or previewing. A stale
+proposal must be regenerated after source changes. Conversation/key state lasts
+until the local server is restarted. Larger structural changes can still be
+made through direct source work with Codex.
+
+The integration uses the OpenAI Responses API with structured outputs:
+https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses

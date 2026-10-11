@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Build the current academic website with Python's standard library."""
+from news_format import render_news_text
 from person_cards import render_people
 from project_portfolio import project_cards, project_detail
 import json
@@ -60,6 +61,7 @@ def page(filename,title,body,design='classic',description=None,lab_page=False):
     font_controls='<aside class="font-preview" hidden aria-label="Typography preview"><div class="font-preview-title"><strong>Compare typefaces</strong><a href="fonts.html">View samples →</a></div><div class="font-buttons">'+''.join(f'<button type="button" data-font-choice="{key}" aria-pressed="false">{e(name)}</button>' for key,name,_ in FONTS)+'</div><p id="font-description" role="status" aria-live="polite"></p></aside>'
     document_title = profile['lab'] if lab_page else (f"{profile['name']} | {profile['role'].capitalize()}, {profile['university']}" if filename == 'index.html' else f"{title} · {profile['name']}")
     s=head(document_title,description or 'Academic website of Jinzhen Wang at UNC Charlotte. Research, publications, news, and teaching.',design,asset)
+    if (ROOT/'assets/assistant-design.css').exists(): s=s.replace('</head>', '<link rel="stylesheet" href="assets/assistant-design.css"></head>')
     if lab_page: s=s.replace(f'{asset}favicon.svg', f'{asset}lab-favicon.svg')
     if filename=='fonts.html': s=s.replace(f'<link rel="stylesheet" href="{asset}design.css">','')
     shell='page-shell lab-shell' if lab_page else 'page-shell single-column'
@@ -77,7 +79,8 @@ def newslist(items):
     rows=[]
     for n in items:
         date=datetime.strptime(n['date'],'%Y-%m').strftime('%b %Y')
-        text=link(n['text'],n['url']) if n.get('url') else e(n['text'])
+        text=render_news_text(n['text'])
+        if n.get('url'): text=f'<a href="{e(n["url"])}">{text}</a>'
         rows.append(f'<li class="news-item"><time datetime="{n["date"]}">{date}</time><div><span class="news-kind">{e(n["kind"])}</span><p>{text}</p></div></li>')
     return '<ul class="news-list">'+''.join(rows)+'</ul>'
 

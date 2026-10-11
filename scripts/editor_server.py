@@ -24,6 +24,7 @@ from editor.content import bundle, read_content, revision, validate
 from editor.schema import CONTENT_NAMES
 from editor.change_summary import summarize_changes
 from bibliography import lookup as lookup_citation
+from editor.design_assistant import DesignAssistant, CSS_PATH
 
 PUBLISH_BRANCH = "local-design"
 CV_PATH = "assets/cv/jinzhen-wang.pdf"
@@ -39,6 +40,7 @@ class Editor:
     def __init__(self, root, allow_design=False):
         self.root = root.resolve()
         self.allow_design = allow_design
+        self.assistant = DesignAssistant(self.root)
         self.preview = None
         self.lock = threading.Lock()
         self.token = secrets.token_urlsafe(32)
@@ -69,6 +71,46 @@ class Editor:
         except (EditorError, subprocess.TimeoutExpired, FileNotFoundError):
             return dict(ready=False, reason='Publishing needs Git and a local checkout of the GitHub website repository.')
 
+    def push_status(self, payload=None):
+        status = self.publishing_status()
+        if not status['ready']:
+            return dict(state='unavailable', message=status['reason'], confirmed=False)
+        try:
+            self.git('fetch', 'origin', timeout=20)
+            remote_line = self.git('ls-remote', 'origin', 'refs/heads/' + PUBLISH_BRANCH, timeout=20)
+            if not remote_line:
+                return dict(state='unpushed', confirmed=False, message='local-design is not on GitHub yet. Click Publish to push it.')
+            remote = remote_line.split()[0]
+            fetched = self.git('rev-parse', 'refs/remotes/origin/' + PUBLISH_BRANCH)
+            if remote != fetched:
+                return dict(state='unconfirmed', confirmed=False, message='GitHub changed during the check. Check again to confirm your push.')
+            local = self.git('rev-parse', 'HEAD')
+            ahead, behind = map(int, self.git('rev-list', '--left-right', '--count', 'HEAD...' + fetched).split())
+            pending = json.loads(self.pending_path.read_text()) if self.pending_path.exists() else None
+            wanted = pending['commit'] if pending else local
+            received = subprocess.run(['git', '-C', str(self.root), 'merge-base', '--is-ancestor', wanted, fetched], capture_output=True).returncode == 0
+            checked = datetime.now(timezone.utc).isoformat()
+            if pending and received:
+                self.pending_path.unlink(missing_ok=True)
+            dirty = bool(self.git('status', '--porcelain'))
+            state = 'synced'
+            message = 'GitHub confirmed commit ' + wanted[:7] + ' on local-design.'
+            if ahead and behind:
+                state, message = 'diverged', 'Local and GitHub commits have diverged. Reconcile local-design before publishing.'
+            elif ahead:
+                state, message = 'unpushed', f'{ahead} local commit(s) have not reached GitHub. Click Publish to push them.'
+            elif dirty:
+                state, message = 'saved', 'Saved local changes have not been pushed. Click Publish when ready.'
+            elif behind:
+                state, message = 'behind', 'Your commit is confirmed on GitHub; newer remote changes are available. Reopen with a clean checkout to pull them.'
+            if pending and not received:
+                state, message = 'unpushed', 'Your previous push is not confirmed. Click Publish to retry the saved commit.'
+            return dict(state=state, message=message, confirmed=received, local_commit=local,
+                        remote_commit=remote, checked_at=checked, ahead=ahead, behind=behind)
+        except (EditorError, subprocess.TimeoutExpired, ValueError, OSError):
+            return dict(state='unconfirmed', confirmed=False,
+                        message='GitHub push status could not be verified. Check authentication/network, then Check GitHub or retry Publish. Local files are preserved.')
+
     def candidate(self, payload, publishing=False):
         if not isinstance(payload, dict) or payload.get('schema_version') != 1:
             raise EditorError('Import an editor content package, version 1.')
@@ -84,7 +126,7 @@ class Editor:
             raise EditorError('Please fix the highlighted content fields.', errors=errors)
         return payload['content']
 
-    def build_preview(self, data):
+    def build_preview(self, data, asset_overrides=None):
         temporary = tempfile.TemporaryDirectory(prefix='hpdi-editor-')
         folder = Path(temporary.name)
         try:
@@ -96,6 +138,9 @@ class Editor:
             shutil.copytree(self.root, folder, dirs_exist_ok=True, ignore=ignored)
             for name in CONTENT_NAMES:
                 (folder / 'content' / f'{name}.json').write_text(json.dumps(data[name], ensure_ascii=False, indent=2) + '\n')
+            for name, source in (asset_overrides or {}).items():
+                (folder / name).parent.mkdir(parents=True, exist_ok=True)
+                (folder / name).write_text(source)
             for script in ('build.py', 'scripts/check_site.py'):
                 result = subprocess.run([sys.executable, script], cwd=folder, capture_output=True, text=True, timeout=45)
                 if result.returncode:
@@ -135,8 +180,55 @@ class Editor:
             except Exception:
                 for name in changed: shutil.copy2(backup / f'{name}.json', self.root / 'content' / f'{name}.json')
                 raise
+        if not changed:
+            # A replacement PDF can keep the same profile link; refresh assets anyway.
+            shutil.copytree(Path(temporary.name) / 'dist', self.root / 'dist', dirs_exist_ok=True)
         temporary.cleanup()
         return dict(ok=True, bundle=bundle(self.root), changed=changed)
+
+    def design_configure(self, payload):
+        return self.assistant.configure(payload)
+
+    def design_chat(self, payload):
+        return self.assistant.request(payload)
+
+    def design_preview(self, payload):
+        proposal = self.assistant.get_proposal(payload)
+        data = read_content(self.root); data['design'] = proposal['design']
+        temporary = self.build_preview(data, {CSS_PATH: proposal['css']})
+        previous = self.preview; self.preview = temporary
+        if previous: previous.cleanup()
+        return dict(ok=True, preview_url='/preview/index.html')
+
+    def design_apply(self, payload):
+        proposal = self.assistant.get_proposal(payload)
+        data = read_content(self.root); data['design'] = proposal['design']
+        temporary = self.build_preview(data, {CSS_PATH: proposal['css']})
+        try:
+            self.assistant.get_proposal(payload)  # Check again after validation/build.
+            backup = self.state / 'backups' / datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+            backup.mkdir(parents=True)
+            targets = {'content/design.json': json.dumps(proposal['design'], ensure_ascii=False, indent=2)+'\n', CSS_PATH:proposal['css']}
+            old = {name:(self.root / name).read_bytes() if (self.root / name).exists() else None for name in targets}
+            for name, raw in old.items():
+                if raw is not None: (backup / Path(name).name).write_bytes(raw)
+            try:
+                for name, source in targets.items():
+                    target = self.root / name; stage = target.with_suffix(target.suffix+'.editor-tmp')
+                    stage.write_text(source); stage.replace(target)
+                shutil.copytree(Path(temporary.name) / 'dist', self.root / 'dist', dirs_exist_ok=True)
+            except Exception:
+                for name, raw in old.items():
+                    target = self.root / name
+                    if raw is None: target.unlink(missing_ok=True)
+                    else: target.write_bytes(raw)
+                raise
+            self.assistant.proposal = None
+            return dict(ok=True, bundle=bundle(self.root), message='Design applied locally. Publish design when ready.')
+        finally: temporary.cleanup()
+
+    def design_publish(self, payload):
+        return self.publish(bundle(self.root), design_publish=True)
 
     def lookup_bibtex(self, payload):
         try: return lookup_citation(payload['paper'])
@@ -158,11 +250,12 @@ class Editor:
         stage = target.with_suffix('.pdf.editor-tmp'); stage.write_bytes(raw); stage.replace(target)
         return dict(ok=True, path=CV_PATH)
 
-    def publish(self, payload):
+    def publish(self, payload, design_publish=False):
         status = self.publishing_status()
         if not status['ready']: raise EditorError(status['reason'], 409)
         outside = self.git('diff', '--name-only', 'HEAD').splitlines() + self.git('ls-files', '--others', '--exclude-standard').splitlines()
         allowed = {f'content/{name}.json' for name in CONTENT_NAMES if name != 'design'} | {CV_PATH}
+        if design_publish: allowed = {'content/design.json', CSS_PATH}
         if any(path not in allowed and not path.startswith('dist/') for path in outside):
             raise EditorError('There are code or layout changes outside the editor. Commit or discard them separately before publishing content.', 409)
         if self.pending_path.exists():
@@ -183,15 +276,23 @@ class Editor:
             payload = json.loads(json.dumps(payload))
             payload['content']['profile']['updated'] = datetime.now(ZoneInfo('America/New_York')).strftime('%B %-d, %Y')
             saved = self.save(payload, publishing=True)
-            paths = [f'content/{name}.json' for name in CONTENT_NAMES if name != 'design'] + ['dist']
-            if not self.git('ls-files', '--', 'dist'):
+            paths = (['content/design.json', 'content/profile.json'] + ([CSS_PATH] if (self.root / CSS_PATH).exists() else [])) if design_publish else [f'content/{name}.json' for name in CONTENT_NAMES if name != 'design'] + ['dist']
+            if 'dist' in paths and not self.git('ls-files', '--', 'dist'):
                 paths.remove('dist')  # GitHub Actions rebuilds ignored output from source.
-            if (self.root / CV_PATH).exists(): paths.append(CV_PATH)
+            if not design_publish and (self.root / CV_PATH).exists(): paths.append(CV_PATH)
             self.git('add', '--', *paths)
             if not self.git('diff', '--cached', '--name-only'):
-                return dict(ok=True, message='No content changes to publish.', bundle=saved['bundle'])
+                checked = self.push_status()
+                if checked.get('confirmed'):
+                    return dict(ok=True, message='No content changes to publish.', bundle=saved['bundle'], push_status=checked)
+                if checked.get('state') != 'unpushed':
+                    raise EditorError(checked['message'], 409, push_status=checked)
+                pending = dict(commit=self.git('rev-parse', 'HEAD'), branch=PUBLISH_BRANCH)
+                self.state.mkdir(exist_ok=True)
+                self.pending_path.write_text(json.dumps(pending))
+                return self.publish(saved['bundle'], design_publish=design_publish)
             try:
-                self.git('commit', '-m', summarize_changes(committed_content, read_content(self.root)) + ('\n- CV: upload PDF' if CV_PATH in self.git('diff', '--cached', '--name-only').splitlines() else ''))
+                self.git('commit', '-m', ('Update website design\n\n- Apply reviewed design settings and CSS overrides' if design_publish else summarize_changes(committed_content, read_content(self.root))) + ('\n- CV: upload PDF' if CV_PATH in self.git('diff', '--cached', '--name-only').splitlines() else ''))
             except EditorError:
                 raise EditorError('Content is saved locally, but Git could not create the commit. Check your Git name/email configuration.', 409, saved=True)
             pending = dict(commit=self.git('rev-parse', 'HEAD'), branch=PUBLISH_BRANCH)
@@ -201,8 +302,11 @@ class Editor:
             self.git('push', 'origin', 'HEAD:' + PUBLISH_BRANCH, timeout=45)
         except (EditorError, subprocess.TimeoutExpired):
             raise EditorError('The content commit is saved locally, but GitHub did not confirm the push. Check authentication/network and click Publish again to retry this commit.', 409, saved=True, committed=True, commit=pending['commit'], bundle=bundle(self.root))
+        checked = self.push_status()
+        if not checked.get('confirmed'):
+            raise EditorError('Git returned from push, but GitHub receipt is not confirmed. Check GitHub or click Publish again to retry.', 409, saved=True, committed=True, commit=pending['commit'], bundle=bundle(self.root), push_status=checked)
         self.pending_path.unlink(missing_ok=True)
-        return dict(ok=True, commit=pending['commit'], bundle=bundle(self.root), message='Pushed to local-design. Merge its pull request into main to update the live website.')
+        return dict(ok=True, push_status=checked, commit=pending['commit'], bundle=bundle(self.root), message='GitHub confirmed your push to local-design (' + pending['commit'][:7] + '). Merge into main when ready to deploy.')
 
 
 def make_handler(editor):
@@ -225,7 +329,7 @@ def make_handler(editor):
             if not self.trusted_host(): return self.reply(dict(error='Invalid host.'), 403)
             path = unquote(urlparse(self.path).path)
             if path == '/api/status':
-                return self.reply(dict(mode='local', token=editor.token, bundle=bundle(editor.root), publishing=editor.publishing_status()))
+                return self.reply(dict(mode='local', token=editor.token, bundle=bundle(editor.root), publishing=editor.publishing_status(), assistant=editor.assistant.status()))
             if path.startswith('/api/'): return self.reply(dict(error='Unknown endpoint.'), 404)
             root = editor.root / 'dist'
             if path.startswith('/preview/'):
@@ -256,11 +360,11 @@ def make_handler(editor):
             if not editor.lock.acquire(blocking=False): return self.reply(dict(error='Another editor operation is running. Try again when it finishes.'), 409)
             try:
                 payload = json.loads(self.rfile.read(length))
-                action = {'/api/preview': editor.preview_content, '/api/save': editor.save, '/api/publish': editor.publish, '/api/upload-cv': editor.upload_cv, '/api/bibtex': editor.lookup_bibtex}.get(urlparse(self.path).path)
+                action = {'/api/preview': editor.preview_content, '/api/save': editor.save, '/api/publish': editor.publish, '/api/upload-cv': editor.upload_cv, '/api/bibtex': editor.lookup_bibtex, '/api/push-status': editor.push_status, '/api/design-configure': editor.design_configure, '/api/design-chat': editor.design_chat, '/api/design-preview': editor.design_preview, '/api/design-apply': editor.design_apply, '/api/design-publish': editor.design_publish}.get(urlparse(self.path).path)
                 if not action: raise EditorError('Unknown editor action.', 404)
                 self.reply(action(payload))
             except EditorError as error: self.reply(dict(error=str(error), **error.extra), error.status)
-            except (ValueError, TypeError): self.reply(dict(error='The content package could not be read.'), 400)
+            except (ValueError, TypeError) as error: self.reply(dict(error=str(error) or 'The content package could not be read.'), 400)
             except subprocess.TimeoutExpired: self.reply(dict(error='The operation timed out. Check the repository state before retrying.'), 504)
             except Exception: self.reply(dict(error='The operation failed. Your draft remains in the browser; download it before restarting.'), 500)
             finally: editor.lock.release()

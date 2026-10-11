@@ -135,6 +135,7 @@ class EditorTests(unittest.TestCase):
             self.assertEqual(request('POST', '/api/save', headers, body)[0], 403)
             headers['X-Editor-Token'] = token
             self.assertEqual(request('POST', '/api/preview', headers, body)[0], 200)
+            self.assertEqual(request('POST', '/api/push-status', headers, '{}')[0], 200)
             self.assertEqual(request('GET', '/preview/index.html')[0], 200)
             large = dict(headers, **{'Content-Length': '1000001'})
             self.assertEqual(request('POST', '/api/save', large, b'{}')[0], 413)
@@ -191,6 +192,38 @@ class EditorTests(unittest.TestCase):
             unchanged = self.editor.publish(bundle(self.root))
             self.assertEqual(unchanged['message'], 'No content changes to publish.')
             self.assertEqual(git('rev-parse', 'HEAD'), commit)
+            self.assertTrue(retry['push_status']['confirmed'])
+            self.assertEqual(self.editor.push_status()['state'], 'synced')
+            # A zero exit code alone is insufficient: simulate no remote receipt.
+            unreceived = self.draft()
+            unreceived['content']['news'][0]['text'] = 'Unreceived publication test'
+            def fake_success(*args, **kwargs):
+                if args[0] == 'push': return ''
+                return original_git(*args, **kwargs)
+            with patch.object(self.editor, 'git', side_effect=fake_success):
+                with self.assertRaises(EditorError) as error:
+                    self.editor.publish(unreceived)
+            self.assertIn('not confirmed', str(error.exception))
+            self.assertTrue(self.editor.pending_path.exists())
+            self.assertEqual(self.editor.push_status()['state'], 'unpushed')
+            # Confirmation also works after the user pushes manually.
+            git('push', 'origin', 'HEAD:local-design')
+            self.assertTrue(self.editor.push_status()['confirmed'])
+            self.assertFalse(self.editor.pending_path.exists())
+            git('switch', '--detach')
+            (self.root / 'bot-marker.txt').write_text('remote bot update')
+            git('add', 'bot-marker.txt'); git('commit', '-m', 'Bot update'); git('push', 'origin', 'HEAD:local-design')
+            git('switch', 'local-design')
+            checked = self.editor.push_status()
+            self.assertTrue(checked['confirmed']); self.assertEqual(checked['state'], 'behind')
+            git('merge', '--ff-only', 'origin/local-design')
+            saved = self.draft(); self.editor.save(saved)
+            self.assertEqual(self.editor.push_status()['state'], 'saved')
+            def offline(*args, **kwargs):
+                if args[0] == 'fetch': raise EditorError('offline')
+                return original_git(*args, **kwargs)
+            with patch.object(self.editor, 'git', side_effect=offline):
+                self.assertEqual(self.editor.push_status()['state'], 'unconfirmed')
 
 
 if __name__ == '__main__': unittest.main()

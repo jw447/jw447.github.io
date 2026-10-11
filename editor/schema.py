@@ -25,7 +25,7 @@ SECTIONS = [
     ]),
     dict(key='news', label='News', path=['news'], list=True, fields=[
         field('date', 'Month', 'month', True), field('kind', 'Category', required=True),
-        field('text', 'Announcement', 'textarea', True), field('url', 'Link', 'url'),
+        field('text', 'Announcement', 'richtext', True), field('url', 'Link', 'url'),
     ]),
     dict(key='publications', label='Papers', path=['publications'], list=True, fields=[
         field('title', 'Paper title', 'textarea', True), field('year', 'Publication year', 'number', True),
@@ -43,7 +43,7 @@ SECTIONS = [
     dict(key='projects', label='Projects', path=['projects'], list=True, fields=[
         field('publication_ids', 'Publication IDs (one per line)', 'lines', required=False),
         field('name', 'Project name', required=True), field('subtitle', 'Subtitle', required=True),
-        field('context', 'Venue / program / year', required=True),
+        field('summary', 'Card introduction', 'textarea'),
         field('description', 'Description', 'textarea', True),
         field('people', 'Collaborators', 'textarea'), field('links', 'Project links', 'records', fields=LINKS),
     ]),

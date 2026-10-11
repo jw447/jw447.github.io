@@ -1,0 +1,16 @@
+/* Complete replacement override stylesheet */
+
+.project .collaborators,
+.portfolio-card .collaborators,
+.project-card .collaborators,
+[class*="project"] .collaborators{
+  display:none !important;
+}
+
+.portfolio-card .portfolio-context,
+.project .project-subtitle,
+.project .project-context,
+.project-card .project-context,
+[class*="project"] .project-context{
+  display:none !important;
+}

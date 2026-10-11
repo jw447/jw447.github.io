@@ -115,7 +115,6 @@ body .portfolio-card{display:flex;flex-direction:column;gap:12px;padding:28px;bo
 body .portfolio-card h3,body .portfolio-card p{margin:0}
 body .portfolio-card:hover{transform:translateY(-3px);border-color:var(--accent);text-decoration:none}
 body .portfolio-card:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
-body .portfolio-context{color:var(--muted);font-size:var(--d-body-size)}
 body .portfolio-more{margin-top:auto;color:var(--accent);font-size:var(--d-body-size)}
 html[data-theme="dark"] body .sponsor-logo-panel{background:#fff;border-radius:8px}
 @media(prefers-color-scheme:dark){html:not([data-theme="light"]) body .sponsor-logo-panel{background:#fff;border-radius:8px}}

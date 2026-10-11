@@ -49,7 +49,8 @@
       "doi": "10.1145/3721145.3725763",
       "url": "https://doi.org/10.1145/3721145.3725763"
     },
-    "citation_source": "https://api.crossref.org/works/10.1145/3721145.3725763"
+    "citation_source": "https://api.crossref.org/works/10.1145/3721145.3725763",
+    "bibtex": "@inproceedings{neurlz2025,\n  title = {{NeurLZ: An Online Neural Learning-based Method to Enhance Scientific Lossy Compression}},\n  author = {Jia, Wenqi and Hu, Zhewen and Liu, Youyuan and Zhang, Boyuan and Wang, Jinzhen and Liu, Jinyang and Niu, Wei and Kalafatis, Stavros and Huang, Junzhou and Jin, Sian and Wang, Daoce and Tian, Jiannan and Yin, Miao},\n  booktitle = {Proceedings of the 39th ACM International Conference on Supercomputing},\n  year = {2025},\n  pages = {26--42},\n  publisher = {ACM},\n  doi = {10.1145/3721145.3725763},\n  url = {https://doi.org/10.1145/3721145.3725763}\n}"
   },
   {
     "id": "qualitynet2024",
