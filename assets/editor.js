@@ -150,7 +150,7 @@
   }
   function appendChat(who, message) {
     const entry = text('div', '', 'assistant-message'); entry.append(text('strong', who), text('div', message));
-    $('assistant-chat').append(entry); entry.scrollIntoView({block:'nearest'});
+    const chat = $('assistant-chat'); chat.append(entry); chat.scrollTop = chat.scrollHeight;
   }
   async function assistantOperation(label, callback) {
     if (!local) { notice('Open the local editor with python3 edit.py to use the design assistant.'); return; }
