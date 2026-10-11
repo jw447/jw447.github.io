@@ -7,8 +7,9 @@
   const text = (tag, value, className) => { const node = document.createElement(tag); node.textContent = value; if (className) node.className = className; return node; };
   const button = (label, action, className) => { const node = text('button', label, className); node.type = 'button'; node.addEventListener('click', action); return node; };
   let seed, schema, draft, baseline, local = null, section, index = 0, busy = false, crossTab = false, exactPreview = false;
-  function notice(message) { $('notice').textContent = message; $('notice').hidden = !message; }
-  function showErrors(errors) { $('errors').replaceChildren(); $('errors').hidden = !errors.length; if (errors.length) { const list = document.createElement('ul'); errors.slice(0, 12).forEach(error => list.append(text('li', error))); $('errors').append(list); } }
+  function dismissButton(container) { const close = button('×', () => { container.hidden = true; }, 'notification-close'); close.setAttribute('aria-label', 'Dismiss notification'); return close; }
+  function notice(message) { const container = $('notice'); container.replaceChildren(); container.hidden = !message; if (message) container.append(text('span', message), dismissButton(container)); }
+  function showErrors(errors) { $('errors').replaceChildren(); $('errors').hidden = !errors.length; if (errors.length) { const list = document.createElement('ul'); errors.slice(0, 12).forEach(error => list.append(text('li', error))); $('errors').append(list, dismissButton($('errors'))); } }
   function report(error) { notice(error.message || String(error)); }
   function check() { const errors = M.validate(draft.content, schema, baseline); showErrors(errors); return !errors.length; }
   function updateStatus() {
