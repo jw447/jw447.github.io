@@ -78,5 +78,5 @@ window.HPDiDesignEditor = function(options) {
   for(const id of ['design-viewport','design-theme'])$(id).addEventListener('change',apply);
   $('design-frame').addEventListener('load',apply);new ResizeObserver(scale).observe($('design-frame').parentElement);
   const enlarge=()=>{$('design-dialog-slot').append($('design-preview-shell'));$('design-dialog').showModal();scale();};$('enlarge-design').addEventListener('click',enlarge);$('close-design-dialog').addEventListener('click',()=>$('design-dialog').close());$('design-dialog').addEventListener('close',()=>{$('design-preview-home').append($('design-preview-shell'));scale();});
-  refreshPresets();return{show(){drawFields();apply();loadPage();},enlarge,refresh(){drawFields();apply();}};
+  refreshPresets();return{show(){pages.clear();drawFields();apply();loadPage();},enlarge,refresh(){drawFields();apply();}};
 };

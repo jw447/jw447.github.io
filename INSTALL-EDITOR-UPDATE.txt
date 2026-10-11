@@ -1,0 +1,19 @@
+Extract this ZIP into the root of your existing jwang-hpc.github.io checkout, replacing the listed files. It is an update package, not a complete repository. Content and public design files are untouched.
+
+Run python3 edit.py. Edit content, click Preview, then Save files. View current site opens the saved primary page. Future layout/CSS changes enter draft previews through the same build automatically. Restart after editing editor UI files.
+
+If you have a saved browser draft, download it before choosing Load current content. Hosted editing still exports JSON; exact draft preview needs the local editor. Embedded preview scripts are disabled, so test theme controls/popups on the saved site at http://127.0.0.1:8765/.
+
+Commit these updated files and content changes on your review branch, then merge to main when ready. This package does not push or deploy anything.
+
+Checks: build and local links; 9 Python and 8 Node tests; JavaScript syntax. Browser visual testing was not available.
+
+Changed files:
+scripts/editor_server.py
+assets/editor.js
+assets/design-editor.js
+editor/index.html
+edit.py
+README.md
+AGENTS.md
+tests/test_editor.py

@@ -128,3 +128,19 @@ The lab hero shows only `HPDi Lab` and the mission paragraph. Do not reintroduce
 The owner confirmed Aagat Pokhrel as a displayed Students entry; keep the generic Team member role until further information is supplied, and do not infer a joining date. Adelina Zheng belongs to Alumni as a summer REU student and Brown University undergraduate; no year is supplied. People use the same responsive three-column grid for Faculty, Students, and Alumni (two columns on medium screens and one on phones), without profile divider lines or a separate PI portrait layout. The lab joining section is removed. Lab mission text includes a linked PI introduction and focuses on scientific data management, compression, HPC systems, and machine learning. The homepage browser title is Jinzhen Wang | Assistant professor, University of North Carolina at Charlotte, derived from profile fields; lab page browser titles are HPDi Lab. The remaining CCI header logo has no added padding and aligns with the page content's left edge. Do not reintroduce a university header logo.
 
 Sponsor alignment uses three equal-width columns, each with a centered 240×96px image box. Preserve this even distribution and equal image dimensions; do not restore a flex group aligned to one side. On phones, use evenly centered rows with the same image-box size.
+
+## Primary editor preview
+Content previews use the actual primary generated pages through the local build.
+Do not introduce a second JavaScript page renderer. Copy current source modules
+into isolated draft builds, preserve validation/revision protections, and exclude
+Git metadata, generated output, credentials and local state. Hosted editing exports
+drafts; exact previews require the loopback editor. `python3 edit.py` starts it.
+
+## Current simplified workflow (supersedes prior editor/design UI instructions)
+Use python3 edit.py for startup sync: require a clean checkout, fetch origin,
+fast-forward website-redesign, then merge origin/main without discarding work.
+Publish commits summarized content changes and pushes only website-redesign.
+Main remains the deployment branch and is changed through review/merge.
+The browser editor supports content only; do not restore design forms/presets.
+Design changes use scripts/design_xml.py with supported XML, or source edits.
+Content preview must use the current primary build without a duplicate renderer.
