@@ -38,8 +38,9 @@ class EditorTests(unittest.TestCase):
     def test_preview_does_not_save_and_save_rebuilds_with_backup(self):
         before = read_content(self.root)
         draft = self.draft()
-        self.editor.preview_content(draft)
-        preview = Path(self.editor.preview.name) / 'dist/compact/index.html'
+        result = self.editor.preview_content(draft)
+        self.assertEqual(result['preview_url'], '/preview/index.html')
+        preview = Path(self.editor.preview.name) / 'dist/index.html'
         self.assertIn('Editor integration test announcement.', preview.read_text())
         self.assertEqual(read_content(self.root), before)
         saved = self.editor.save(draft)
@@ -49,6 +50,21 @@ class EditorTests(unittest.TestCase):
         self.assertEqual(json.loads(backups[0].read_text()), before['news'])
         with self.assertRaises(EditorError) as error: self.editor.save(draft)
         self.assertEqual(error.exception.status, 409)
+
+    def test_preview_uses_current_template_and_new_renderer_module(self):
+        (self.root / 'future_renderer.py').write_text("MARKER = 'Future template marker'\n")
+        build = self.root / 'build.py'
+        with build.open('a') as output:
+            output.write("\nfrom future_renderer import MARKER\np = OUT / 'index.html'\np.write_text(p.read_text().replace('</main>', '<p>' + MARKER + '</p></main>'))\n")
+        self.editor.preview_content(self.draft())
+        page = Path(self.editor.preview.name) / 'dist/index.html'
+        self.assertIn('Future template marker', page.read_text())
+
+    def test_content_editor_rejects_design_changes(self):
+        draft = self.draft()
+        draft['content']['design']['typography']['body_size'] = 18
+        with self.assertRaisesRegex(EditorError, 'cannot change design'):
+            self.editor.preview_content(draft)
 
     def test_bad_input_and_build_failure_leave_content_unchanged(self):
         before = read_content(self.root)
@@ -71,7 +87,7 @@ class EditorTests(unittest.TestCase):
         design['typography']['body_size'] = 18
         design['layout'].update(page_width=1200, news_height=440, portrait_position='right')
         self.assertEqual(validate_design(design), [])
-        saved = self.editor.save(json.loads(json.dumps(draft)))
+        saved = Editor(self.root, allow_design=True).save(json.loads(json.dumps(draft)))
         self.assertEqual(saved['changed'], ['design'])
         self.assertEqual(read_content(self.root)['news'], before['news'])
         css = (self.root / 'dist/assets/design-tokens.css').read_text()
@@ -129,8 +145,8 @@ class EditorTests(unittest.TestCase):
         subprocess.run(['git', 'init', '--bare', str(remote)], check=True, capture_output=True)
         def git(*args):
             return subprocess.run(['git', '-C', str(self.root), *args], check=True, capture_output=True, text=True).stdout.strip()
-        git('init', '-b', 'main'); git('config', 'user.name', 'Editor Test'); git('config', 'user.email', 'test@example.org')
-        git('add', '.'); git('commit', '-m', 'Initial test source'); git('remote', 'add', 'origin', str(remote)); git('push', '-u', 'origin', 'main')
+        git('init', '-b', 'local-design'); git('config', 'user.name', 'Editor Test'); git('config', 'user.email', 'test@example.org')
+        git('add', '.'); git('commit', '-m', 'Initial test source'); git('remote', 'add', 'origin', str(remote)); git('push', '-u', 'origin', 'local-design')
         with patch.object(self.editor, 'github_remote', return_value=True):
             (self.root / 'assets/style.css').write_text('changed layout')
             with self.assertRaises(EditorError): self.editor.publish(self.draft())
@@ -145,8 +161,11 @@ class EditorTests(unittest.TestCase):
             commit = git('rev-parse', 'HEAD')
             retry = self.editor.publish(bundle(self.root))
             self.assertEqual(retry['commit'], commit)
-            self.assertEqual(git('rev-parse', 'origin/main'), commit)
+            self.assertEqual(git('rev-parse', 'origin/local-design'), commit)
             self.assertFalse(self.editor.pending_path.exists())
+            message = git('log', '-1', '--format=%B')
+            self.assertIn('news: add Editor integration test announcement.', message)
+            self.assertNotIn('main', retry['message'].split('.')[0])
             unchanged = self.editor.publish(bundle(self.root))
             self.assertEqual(unchanged['message'], 'No content changes to publish.')
             self.assertEqual(git('rev-parse', 'HEAD'), commit)

@@ -19,6 +19,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from editor.content import bundle, read_content, revision, validate
 from editor.schema import CONTENT_NAMES
+from editor.change_summary import summarize_changes
+
+PUBLISH_BRANCH = "local-design"
 
 
 class EditorError(Exception):
@@ -28,8 +31,9 @@ class EditorError(Exception):
 
 
 class Editor:
-    def __init__(self, root):
+    def __init__(self, root, allow_design=False):
         self.root = root.resolve()
+        self.allow_design = allow_design
         self.preview = None
         self.lock = threading.Lock()
         self.token = secrets.token_urlsafe(32)
@@ -54,8 +58,8 @@ class Editor:
             if not self.github_remote(remote):
                 return dict(ready=False, reason='Publishing needs a GitHub origin remote. Preview and saving are available.')
             branch = self.git('branch', '--show-current')
-            if branch != 'main':
-                return dict(ready=False, reason='Switch to the main branch to publish; other branches support preview and saving.')
+            if branch != PUBLISH_BRANCH:
+                return dict(ready=False, reason='Start with python3 edit.py to synchronize and publish local-design.')
             return dict(ready=True, repository=remote, branch=branch)
         except (EditorError, subprocess.TimeoutExpired, FileNotFoundError):
             return dict(ready=False, reason='Publishing needs Git and a local checkout of the GitHub website repository.')
@@ -66,6 +70,8 @@ class Editor:
         baseline = read_content(self.root)
         if payload.get('base_revision') != revision(baseline):
             raise EditorError('The source content changed since this draft was loaded. Download your draft, then load the current content before applying it.', 409)
+        if not self.allow_design and isinstance(payload.get('content'), dict) and payload['content'].get('design') != baseline['design']:
+            raise EditorError('The content editor cannot change design. Import design XML separately.')
         errors = validate(payload.get('content'), baseline)
         if errors:
             raise EditorError('Please fix the highlighted content fields.', errors=errors)
@@ -75,15 +81,14 @@ class Editor:
         temporary = tempfile.TemporaryDirectory(prefix='hpdi-editor-')
         folder = Path(temporary.name)
         try:
-            shutil.copytree(self.root / 'content', folder / 'content')
+            # Use the same source tree as deployment, including future renderers.
+            # Exclude generated output, repository state and local-only data.
+            ignored = shutil.ignore_patterns('.git', '.openai', 'dist', '.editor-state',
+                                            '__pycache__', '.DS_Store', '._*',
+                                            '.venv', 'venv', 'node_modules', '.env', '.env.*')
+            shutil.copytree(self.root, folder, dirs_exist_ok=True, ignore=ignored)
             for name in CONTENT_NAMES:
                 (folder / 'content' / f'{name}.json').write_text(json.dumps(data[name], ensure_ascii=False, indent=2) + '\n')
-            for source in ('build.py', 'simple_layout.py', 'publication_format.py', 'person_cards.py', 'project_portfolio.py'):
-                shutil.copy2(self.root / source, folder / source)
-            shutil.copytree(self.root / 'editor', folder / 'editor', ignore=shutil.ignore_patterns('__pycache__'))
-            shutil.copytree(self.root / 'assets', folder / 'assets')
-            (folder / 'scripts').mkdir()
-            shutil.copy2(self.root / 'scripts/check_site.py', folder / 'scripts/check_site.py')
             for script in ('build.py', 'scripts/check_site.py'):
                 result = subprocess.run([sys.executable, script], cwd=folder, capture_output=True, text=True, timeout=45)
                 if result.returncode:
@@ -98,7 +103,7 @@ class Editor:
         previous = self.preview
         self.preview = temporary
         if previous: previous.cleanup()
-        return dict(ok=True, preview_url='/preview/compact/index.html')
+        return dict(ok=True, preview_url='/preview/index.html')
 
     def save(self, payload):
         data = self.candidate(payload)
@@ -129,38 +134,45 @@ class Editor:
     def publish(self, payload):
         status = self.publishing_status()
         if not status['ready']: raise EditorError(status['reason'], 409)
-        outside = self.git('diff', '--name-only', 'HEAD').splitlines()
-        allowed = {f'content/{name}.json' for name in CONTENT_NAMES}
+        outside = self.git('diff', '--name-only', 'HEAD').splitlines() + self.git('ls-files', '--others', '--exclude-standard').splitlines()
+        allowed = {f'content/{name}.json' for name in CONTENT_NAMES if name != 'design'}
         if any(path not in allowed and not path.startswith('dist/') for path in outside):
             raise EditorError('There are code or layout changes outside the editor. Commit or discard them separately before publishing content.', 409)
         if self.pending_path.exists():
             pending = json.loads(self.pending_path.read_text())
+            if pending.get('branch', PUBLISH_BRANCH) != PUBLISH_BRANCH:
+                raise EditorError('The pending commit targets another branch. Push it manually before continuing.', 409)
             if self.git('rev-parse', 'HEAD') != pending['commit'] or outside:
                 raise EditorError('A previous publish needs attention. Finish pushing its commit before making another content publish.', 409)
             if revision(self.candidate(payload)) != revision(read_content(self.root)):
                 raise EditorError('Push the previous saved commit before publishing this new draft.', 409)
         else:
-            self.git('fetch', 'origin', 'main', timeout=45)
-            if self.git('rev-parse', 'HEAD') != self.git('rev-parse', 'origin/main'):
+            self.git('fetch', 'origin', timeout=45)
+            remote_ref = 'refs/remotes/origin/' + PUBLISH_BRANCH
+            exists = subprocess.run(['git', '-C', str(self.root), 'show-ref', '--verify', '--quiet', remote_ref]).returncode == 0
+            if exists and subprocess.run(['git', '-C', str(self.root), 'merge-base', '--is-ancestor', remote_ref, 'HEAD']).returncode != 0:
                 raise EditorError('Local and GitHub history differ. Synchronize the main branch before publishing.', 409)
+            committed_content = {name: json.loads(self.git('show', f'HEAD:content/{name}.json')) for name in CONTENT_NAMES}
             saved = self.save(payload)
-            paths = [f'content/{name}.json' for name in CONTENT_NAMES] + ['dist']
+            paths = [f'content/{name}.json' for name in CONTENT_NAMES if name != 'design'] + ['dist']
+            if not self.git('ls-files', '--', 'dist'):
+                paths.remove('dist')  # GitHub Actions rebuilds ignored output from source.
             self.git('add', '--', *paths)
             if not self.git('diff', '--cached', '--name-only'):
                 return dict(ok=True, message='No content changes to publish.', bundle=saved['bundle'])
             try:
-                self.git('commit', '-m', 'Update website content through browser editor')
+                self.git('commit', '-m', summarize_changes(committed_content, read_content(self.root)))
             except EditorError:
                 raise EditorError('Content is saved locally, but Git could not create the commit. Check your Git name/email configuration.', 409, saved=True)
-            pending = dict(commit=self.git('rev-parse', 'HEAD'))
+            pending = dict(commit=self.git('rev-parse', 'HEAD'), branch=PUBLISH_BRANCH)
             self.state.mkdir(exist_ok=True)
             self.pending_path.write_text(json.dumps(pending))
         try:
-            self.git('push', 'origin', 'HEAD:main', timeout=45)
+            self.git('push', 'origin', 'HEAD:' + PUBLISH_BRANCH, timeout=45)
         except (EditorError, subprocess.TimeoutExpired):
             raise EditorError('The content commit is saved locally, but GitHub did not confirm the push. Check authentication/network and click Publish again to retry this commit.', 409, saved=True, committed=True, commit=pending['commit'], bundle=bundle(self.root))
         self.pending_path.unlink(missing_ok=True)
-        return dict(ok=True, commit=pending['commit'], bundle=bundle(self.root), message='Pushed to GitHub. The Pages workflow will build and deploy the update.')
+        return dict(ok=True, commit=pending['commit'], bundle=bundle(self.root), message='Pushed to local-design. Merge its pull request into main to update the live website.')
 
 
 def make_handler(editor):
@@ -228,12 +240,17 @@ def make_handler(editor):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=8765)
+    parser.add_argument('--open', action='store_true', help='Open the local editor in your browser')
     args = parser.parse_args()
-    if not (ROOT / 'dist/admin/index.html').exists():
-        subprocess.run([sys.executable, str(ROOT / 'build.py')], check=True)
+    # Always refresh the editor and pages from the current checkout.
+    subprocess.run([sys.executable, str(ROOT / 'build.py')], check=True)
+    subprocess.run([sys.executable, str(ROOT / 'scripts/check_site.py')], check=True)
     editor = Editor(ROOT)
     server = ThreadingHTTPServer(('127.0.0.1', args.port), make_handler(editor))
     print(f'Open http://127.0.0.1:{server.server_port}/admin/ in your browser. Ctrl+C stops the editor.', flush=True)
+    if args.open:
+        import webbrowser
+        webbrowser.open(f'http://127.0.0.1:{server.server_port}/admin/')
     try: server.serve_forever()
     except KeyboardInterrupt: pass
     finally:

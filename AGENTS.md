@@ -91,6 +91,14 @@ The owner authorized Design controls, live desktop/mobile previews, presets, and
 
 Validation enforces 16px minimum text, bounded layout/spacing values, allowed bundled/system font stacks, six-digit colors, and 4.5:1 contrast for body/secondary/link text on both surfaces. Do not accept arbitrary executable CSS. Preserve stale-draft protection and include `design.json` in local saves/backups/publishing. Run the Python and Node editor tests, including preview/build token equivalence and all-layout save checks, after changes.
 
+## GitHub checkout and migration
+
+This is the GitHub Pages codebase. `dist/` is ignored and regenerated. Do not stage ignored output; the local editor publishes source content only when output is not tracked. Keep the Pages workflow on `main` and preserve a review branch until the owner chooses to launch. The root `index.html` is the legacy Google Sites redirect, not the new homepage template. Use the generators for new layout changes.
+
+`content/legacy.json` specifies original underscore HTML routes, `assets/main.css`, `files/`, and `imgs/` to copy unchanged into output. Preserve these files and URLs. Checks verify exact resource bytes separately from new-page metadata and links. The local editor's temporary builds must copy these resources too. No new student information is public until supplied by the owner.
+
+The ChatGPT demo is a separate Sites source/deployment. GitHub changes do not synchronize it automatically. Read README local instructions before editing; use Python 3.9+, rerun build/check after code edits, and push source to the requested branch.
+
 ## Latest profile and publication refinement
 
 The owner now requests only the official CCI logo in the top header. Keep it left aligned, with navigation and theme controls on the right. Preserve the original artwork on its white background in both modes. The horizontal UNC Charlotte logo remains in Sponsors, not the header. Profile controls show exactly Google Scholar, CV, the email address, and the room together in one nonwrapping row in the main column. On narrow screens this row scrolls horizontally without reducing text size. Publication labels stay on one line; reserve at least eight body-size units for the desktop label column and use intrinsic sizing for longer labels. Publication search and year controls were removed; all papers stay visible. The author legend only explains underlined student names; PI authors remain bold without a legend sentence describing bold.
@@ -113,7 +121,7 @@ The footer displays `Last update: (date)` from `profile.updated`, including on m
 
 ## Lab title and confirmed roster
 
-The lab hero shows only `HPDi Lab` and the mission paragraph. Do not reintroduce the university/department eyebrow or the full lab name beneath the title. The full name stays in profile metadata. Confirmed team records have `approved: true`, concise `bio`/`topic` fields, and `source_url`; roles omit time-sensitive year-in-program labels. Preserve the original team page's Alumni grouping for Raivat and do not infer graduation or joining dates. Original team portraits are now stored locally for Mumenin, Jiaxiang, and Raivat. Aagat and Adelina portraits are pending. Sponsor Charlotte uses the same original `logos/charlotte-horizontal.png` asset supplied by the owner; sponsors occupy three equal-width columns with centered, identical 240×96px image boxes and proportional artwork; on narrow screens they form equally centered rows.
+The lab hero shows only `HPDi Lab` and the mission paragraph. Do not reintroduce the university/department eyebrow or the full lab name beneath the title. The full name stays in profile metadata. Confirmed team records have `approved: true`, concise `bio`/`topic` fields, and `source_url`; roles omit time-sensitive year-in-program labels. Preserve the original team page's Alumni grouping for Raivat and do not infer graduation or joining dates. Original team photos were inaccessible during import; the roster is text-only. Sponsor Charlotte uses the same original `logos/charlotte-horizontal.png` asset supplied by the owner; sponsors occupy three equal-width columns with centered, identical 240×96px image boxes and proportional artwork; on narrow screens they form equally centered rows.
 
 ## Latest lab directory refinement
 
@@ -121,10 +129,18 @@ The owner confirmed Aagat Pokhrel as a displayed Students entry; keep the generi
 
 Sponsor alignment uses three equal-width columns, each with a centered 240×96px image box. Preserve this even distribution and equal image dimensions; do not restore a flex group aligned to one side. On phones, use evenly centered rows with the same image-box size.
 
-## Portrait directory and course update
+## Primary editor preview
+Content previews use the actual primary generated pages through the local build.
+Do not introduce a second JavaScript page renderer. Copy current source modules
+into isolated draft builds, preserve validation/revision protections, and exclude
+Git metadata, generated output, credentials and local state. Hosted editing exports
+drafts; exact previews require the loopback editor. `python3 edit.py` starts it.
 
-The owner requested portrait/name modules, visible research keywords, and detailed information on portrait hover or keyboard focus, with a Details disclosure for touch and keyboard users. Faculty and Students share one grid without category headings; Alumni remains separate. Original local photos are used when available; unavailable portraits show honest initials and Photo forthcoming, never generated substitute faces. Portrait selections, keywords, biography, sponsor thank-you text, and course links are editable through the content forms. Broad default keywords High-performance Computing and Data Compression follow the owner's requested lab themes and can be refined per member. Aagat is a Ph.D. student, Computer Science, as confirmed by the owner. Parallel Computing spans Fall 2024–Fall 2026; AI System Design is ITCS 6010/8010, Fall 2026, verified from the supplied course page. Sponsor logos retain equal columns and identical image boxes beneath the shared thank-you sentence.
-
-Original portraits for Mumenin, Jiaxiang, and Raivat are in `assets/people/`, with source provenance in its README. Add owner-supplied `aagat.jpg` and `adelina.jpg` to replace the remaining placeholders automatically. Portraits retain original bytes; no synthetic identities or photo edits are used.
-
-Student and alumni cards omit Computer Science from roles and omit research keyword badges, per latest user request. PI keywords remain.
+## Current simplified workflow (supersedes prior editor/design UI instructions)
+Use python3 edit.py for startup sync: require a clean checkout, fetch origin,
+fast-forward local-design, then merge origin/main without discarding work.
+Publish commits summarized content changes and pushes only local-design.
+Main remains the deployment branch and is changed through review/merge.
+The browser editor supports content only; do not restore design forms/presets.
+Design changes use scripts/design_xml.py with supported XML, or source edits.
+Content preview must use the current primary build without a duplicate renderer.
