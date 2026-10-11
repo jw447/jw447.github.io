@@ -1,1 +1,39 @@
+# Generated website output (GitHub Actions rebuilds it)
+/dist/
+
+# Python bytecode, caches and virtual environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Local content-editor state and backups
+.editor-state/
+
+# ChatGPT Sites hosting metadata (not required for GitHub Pages)
+.openai/
+
+# Local secrets and environment configuration
+.env
+.env.*
+!.env.example
+
+# Operating-system files
 .DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# IDE settings and temporary editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local logs
+*.log
