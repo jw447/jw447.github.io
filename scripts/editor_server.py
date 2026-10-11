@@ -175,6 +175,9 @@ class Editor:
             except Exception:
                 for name in changed: shutil.copy2(backup / f'{name}.json', self.root / 'content' / f'{name}.json')
                 raise
+        if not changed:
+            # A replacement PDF can keep the same profile link; refresh assets anyway.
+            shutil.copytree(Path(temporary.name) / 'dist', self.root / 'dist', dirs_exist_ok=True)
         temporary.cleanup()
         return dict(ok=True, bundle=bundle(self.root), changed=changed)
 
