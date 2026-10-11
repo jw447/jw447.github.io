@@ -29,9 +29,13 @@ def synchronize(root):
         git('switch', '-c', BRANCH, 'origin/main')
     result = git('merge', '--no-edit', 'origin/main', check=False)
     if result.returncode:
+        conflicts = git('diff', '--name-only', '--diff-filter=U', check=False).stdout.strip()
+        details = '\n'.join(part for part in (result.stdout.strip(), result.stderr.strip()) if part)
         if git('rev-parse', '--verify', 'MERGE_HEAD', check=False).returncode == 0:
             git('merge', '--abort')
-        raise RuntimeError('Could not merge the latest main into local-design. Resolve the branch differences manually, then reopen the editor. ' + result.stderr.strip())
+        raise RuntimeError('Could not merge the latest main into local-design. The merge was aborted; your work was preserved. '
+                           + ('Conflicting files: ' + ', '.join(conflicts.splitlines()) + '. ' if conflicts else '')
+                           + 'Resolve the branch differences manually, then reopen the editor.\n' + details)
     return 'Latest main and local-design loaded. Publishing targets local-design.'
 
 if __name__ == '__main__':

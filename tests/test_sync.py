@@ -26,3 +26,16 @@ class SyncTests(unittest.TestCase):
                 (root / 'content.txt').write_text('unsaved')
                 with self.assertRaisesRegex(RuntimeError, 'local changes'): synchronize(root)
                 self.assertEqual((root / 'content.txt').read_text(), 'unsaved')
+
+                git('restore', 'content.txt')
+                (root / 'content.txt').write_text('review edit')
+                git('commit', '-am', 'review edit'); git('push')
+                git('switch', 'main')
+                (root / 'content.txt').write_text('conflicting main edit')
+                git('commit', '-am', 'conflicting main edit'); git('push')
+                main_head = git('rev-parse', 'main')
+                with self.assertRaisesRegex(RuntimeError, 'Conflicting files: content.txt'):
+                    synchronize(root)
+                self.assertEqual(git('status', '--porcelain'), '')
+                self.assertEqual((root / 'content.txt').read_text(), 'review edit')
+                self.assertEqual(git('rev-parse', 'main'), main_head)
