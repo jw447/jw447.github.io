@@ -24,13 +24,15 @@ source. The origin URL should be
 
 ## Daily content editing
 
-Run `python3 edit.py` (Python 3.9+). It checks for a clean Git checkout, fetches
-GitHub, switches to `local-design`, pulls review updates with a fast-forward,
-and merges the newest `origin/main`. A divergence between local and remote review
-history stops startup; a conflict with main aborts that merge and stops startup.
+Run `python3 edit.py` (Python 3.9+). It fetches GitHub and opens `local-design`.
+Clean checkouts pull that branch with a fast-forward. Saved local edits are
+preserved and skip automatic pulling; you can close and reopen without publishing.
+If the network is unavailable or branch histories diverge, the editor opens
+local files and prints a notice. Resolve divergent histories before publishing.
+Dirty checkouts on another branch and unfinished merges require manual resolution.
+Startup never merges `main`; you manage upstream merges and deployment yourself.
 No forced pushes, automatic stashes, discarded files, or main-branch pushes.
-An ordinary merge commit may be created to combine main and unmerged review work.
-Git name/email and authentication must already be configured.
+Git name/email and authentication must already be configured for publishing.
 
 After synchronization, the current website is rebuilt and checked and the editor
 opens at http://127.0.0.1:8765/admin/. If the port is occupied, use
@@ -45,7 +47,7 @@ opens at http://127.0.0.1:8765/admin/. If the port is occupied, use
 
 Publish is a review-branch push, not a live deployment. The included workflow
 publishes `dist/` after changes reach main. Save files alone does not commit;
-publish those changes before restarting, or commit them manually. An interrupted
+saved changes remain available when reopening the editor. An interrupted
 push can be retried with Publish without creating a duplicate commit. Code edits
 outside content must be committed separately before Publish.
 

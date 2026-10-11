@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pull GitHub/main, then open the content editor on local-design."""
+"""Load saved local content and safely sync local-design before opening the editor."""
 from pathlib import Path
 import subprocess
 import sys

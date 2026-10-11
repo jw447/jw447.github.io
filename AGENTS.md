@@ -137,8 +137,10 @@ Git metadata, generated output, credentials and local state. Hosted editing expo
 drafts; exact previews require the loopback editor. `python3 edit.py` starts it.
 
 ## Current simplified workflow (supersedes prior editor/design UI instructions)
-Use python3 edit.py for startup sync: require a clean checkout, fetch origin,
-fast-forward local-design, then merge origin/main without discarding work.
+Use python3 edit.py for startup: fetch origin and fast-forward clean local-design
+checkouts. Preserve dirty local-design files and allow reopening saved content.
+Open local files if offline or diverged; never merge main automatically.
+Do not switch away from dirty other branches or unfinished merges.
 Publish commits summarized content changes and pushes only local-design.
 Main remains the deployment branch and is changed through review/merge.
 The browser editor supports content only; do not restore design forms/presets.
