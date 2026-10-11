@@ -19,14 +19,12 @@ class DesignXMLTests(unittest.TestCase):
         self.design = read_content(ROOT)['design']
         self.xml = to_xml(self.design)
 
-    def test_round_trip_and_exported_snapshots(self):
+    def test_round_trip_for_supported_fonts(self):
         self.assertEqual(from_xml(self.xml), self.design)
         for font in ('palatino', 'optima'):
-            snapshot = from_xml((ROOT / f'assets/design-examples/design-{font}.xml').read_text())
-            self.assertEqual(snapshot['typography']['body_font'], font)
             expected = copy.deepcopy(self.design)
             expected['typography'].update(body_font=font, heading_font=font)
-            self.assertEqual(snapshot, expected)
+            self.assertEqual(from_xml(to_xml(expected)), expected)
 
     def test_invalid_structure_and_values_are_rejected(self):
         invalid = [

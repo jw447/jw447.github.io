@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build academic demos with Python's standard library."""
+"""Build the current academic website with Python's standard library."""
 from person_cards import render_people
 from project_portfolio import project_cards, project_detail
 import json
@@ -10,7 +10,7 @@ from datetime import datetime
 from publication_format import publication_label
 from editor.content import bundle as editor_bundle
 from editor.schema import SECTIONS as editor_sections
-from editor.design import default_design, token_css, validate_design
+from editor.design import token_css, validate_design
 from editor.design_xml import to_xml
 
 ROOT = Path(__file__).resolve().parent
@@ -45,12 +45,9 @@ def link(label,url,cls=''):
 def head(title,desc,design,asset):
     return f'''<!doctype html><html lang="en" data-portrait="{e(design_settings['layout']['portrait_position'])}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="{e(desc)}"><meta name="theme-color" content="{e(palette['accent'])}"><title>{e(title)}</title><link rel="icon" href="{asset}favicon.svg" type="image/svg+xml"><script src="{asset}theme.js"></script><script src="{asset}name-fonts.js" defer></script><script src="{asset}people.js" defer></script><script src="{asset}cv-preview.js" defer></script><link rel="stylesheet" href="{asset}colors.css"><link rel="stylesheet" href="{asset}style.css"><link rel="stylesheet" href="{asset}typography.css"><link rel="stylesheet" href="{asset}theme.css"><link rel="stylesheet" href="{asset}sponsors.css"><link rel="stylesheet" href="{asset}design-tokens.css"><link rel="stylesheet" href="{asset}design.css"><script src="{asset}site.js" defer></script></head><body data-design="{design}" data-font="{e(settings['font'])}"><a class="skip-link" href="#main">Skip to content</a>'''
 
-def sidebar(asset):
-    return f'''<aside class="profile" aria-label="Profile"><img class="portrait" src="{asset}jinzhen-wang.jpg" alt="Jinzhen Wang" width="520" height="440"><div class="profile-info"><h2>{e(profile['name'])}</h2><p class="role">{e(profile['role'])}</p><p class="affiliation">Computer Science<br>UNC Charlotte</p><a class="lab-label" href="lab.html">HPDi Lab <span>High-Performance<br>Data Intensive Lab</span></a></div></aside>'''
-
 def page(filename,title,body,design='classic',description=None,lab_page=False):
-    d=OUT if design=='classic' else OUT/'editorial'; d.mkdir(parents=True,exist_ok=True)
-    asset='assets/' if design=='classic' else '../assets/'
+    d=OUT
+    asset='assets/'
     nav=''
     for item in lab['navigation'] if lab_page else settings['navigation']:
         if item['kind']=='section':
@@ -65,8 +62,8 @@ def page(filename,title,body,design='classic',description=None,lab_page=False):
     s=head(document_title,description or 'Academic website of Jinzhen Wang at UNC Charlotte. Research, publications, news, and teaching.',design,asset)
     if lab_page: s=s.replace(f'{asset}favicon.svg', f'{asset}lab-favicon.svg')
     if filename=='fonts.html': s=s.replace(f'<link rel="stylesheet" href="{asset}design.css">','')
-    shell='page-shell lab-shell' if lab_page else ('page-shell single-column' if design=='classic' else 'page-shell')
-    side=sidebar(asset) if design=='editorial' and not lab_page else ''
+    shell='page-shell lab-shell' if lab_page else 'page-shell single-column'
+    side=''
     if lab_page:
         body=body.replace('src="__SPONSOR_ASSET__', 'src="'+asset).replace('src="__PERSON_ASSET__', 'src="'+asset)
     s+=f'''<header class="site-header"><div class="header-inner"><div class="institution-logos"><a class="hpdi-header-logo" href="{'lab.html' if lab_page else 'index.html'}" aria-label="HPDi Lab home"><img class="hpdi-logo-light" src="{asset}logos/hpdi-header-{'green' if lab_page else 'black'}.png" alt="HPDi Lab"><img class="hpdi-logo-dark" src="{asset}logos/hpdi-header-white.png" alt="HPDi Lab"></a></div><button class="menu-toggle" type="button" aria-controls="site-nav" aria-expanded="false">Menu</button><nav id="site-nav" aria-label="Main navigation">{nav}</nav><button class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" hidden><svg class="theme-icon theme-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg><svg class="theme-icon theme-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42m0-14.14-1.42 1.42M6.35 17.65l-1.42 1.42"/></svg></button></div></header><div class="{shell}">{side}<main id="main">{font_controls}{body}</main></div><footer class="site-footer"><span>@Jinzhen Wang</span><span class="last-update">Last update: {e(profile["updated"])}</span><a href="#main">Back to top ↑</a></footer></body></html>'''
@@ -107,9 +104,7 @@ def intro(title,desc): return f'<div class="page-intro"><p class="eyebrow">HPDi 
 bio=''.join('<p>'+e(p)+'</p>' for p in profile['bio'])
 bio=bio.replace('High-Performance Data Intensive (HPDi) Lab','<a class="bio-lab-link" href="lab.html">High-Performance Data Intensive (HPDi) Lab</a>')
 research='<ul class="research-list">'+''.join('<li>'+e(x)+'</li>' for x in profile['interests'])+'</ul>'
-join=f'''<aside class="join-note"><h3>Interested in joining our research?</h3><p>I welcome inquiries from students interested in high-performance computing and scientific data management.</p>{link('Get in touch →','mailto:'+profile['email'])}</aside>'''
 profile_controls=f'''<div class="profile-controls" role="region" aria-label="Profile links and contact details" tabindex="0">{link('Google Scholar',profile['scholar'],'profile-button')}{link('CV',profile['cv'],'profile-button')}{link(profile['email'],'mailto:'+profile['email'],'contact-chip')}<span class="contact-chip">{e(profile['office'])}</span></div>'''
-home_intro=f'''<section class="home-intro" id="about"><h1>{name_heading}</h1><p class="home-subtitle">Assistant Professor of Computer Science</p>{profile_controls}<div class="bio">{bio}</div>{research}<p class="recruiting-inline"><strong>Prospective students</strong> · Explore {link('HPDi Lab','lab.html')} for research opportunities.</p></section>'''
 main_intro=f'''<section class="home-intro" id="about"><div class="home-profile"><img class="portrait" src="assets/jinzhen-wang.jpg" alt="Jinzhen Wang" width="520" height="440"><div class="home-profile-details"><h1>{name_heading}</h1><p class="home-subtitle">{e(profile['role'])}</p>{profile_controls}</div></div><div class="bio">{bio}</div>{research}<p class="recruiting-inline"><strong>Prospective students</strong> · Explore {link('HPDi Lab','lab.html')} for research opportunities.</p></section>'''
 
 author_legend=f'<p class="author-legend"><span class="student-author">Underlined</span> names are HPDi Lab students.</p>'
@@ -147,29 +142,27 @@ def sponsor_logo(sponsor,asset=None):
     return f'<a class="sponsor-logo-panel" href="{e(sponsor["url"])}"><img src="{prefix}{e(sponsor["logo"])}" alt="{e(sponsor["name"])} logo" width="240" height="96" loading="lazy"></a>'
 sponsor_cards=''.join(sponsor_logo(sponsor,asset=None) for sponsor in lab.get('sponsors',[]))
 labbody+=section('Sponsors','<p class="sponsor-thanks">'+e(lab['sponsor_thanks'])+'</p><div class="sponsor-grid">'+sponsor_cards+'</div>',anchor='sponsors')
-for design in ['classic']:
-    page('index.html','Home',(main_intro if design=='classic' else home_intro)+home_sections,design)
-    page('news.html','News',newsbody,design)
-    page('publications.html','Publications',pubbody,design)
-    page('projects.html','Projects',projbody,design)
-    for project in projects:
-        page('project-'+project['id']+'.html',project['name'],project_detail(project, papers),design,lab_page=True)
-    page('lab.html',profile['lab'],labbody,design,lab_page=True)
-    page('people.html','People',peoplebody,design)
-    page('teaching.html','Teaching',teachbody,design)
-    page('fonts.html','Typography options',fontbody,design)
-    for extra in settings.get('extra_pages',[]):
-        content=intro(extra['title'],extra['description'])
-        for item in extra.get('items',[]):
-            content+=f'<article class="project"><h2>{e(item["title"])}</h2><p>{e(item["description"])}</p>'+(link('Details →',item['url']) if item.get('url') else '')+'</article>'
-        page(extra['file'],extra['title'],content,design)
-    page('404.html','Page not found',intro('Page not found','This page may have moved.')+link('Return home →','index.html'),design)
+page('index.html','Home',main_intro+home_sections)
+page('news.html','News',newsbody)
+page('publications.html','Publications',pubbody)
+page('projects.html','Projects',projbody)
+for project in projects:
+    page('project-'+project['id']+'.html',project['name'],project_detail(project, papers),lab_page=True)
+page('lab.html',profile['lab'],labbody,lab_page=True)
+page('people.html','People',peoplebody)
+page('teaching.html','Teaching',teachbody)
+page('fonts.html','Typography options',fontbody)
+for extra in settings.get('extra_pages',[]):
+    content=intro(extra['title'],extra['description'])
+    for item in extra.get('items',[]):
+        content+=f'<article class="project"><h2>{e(item["title"])}</h2><p>{e(item["description"])}</p>'+(link('Details →',item['url']) if item.get('url') else '')+'</article>'
+    page(extra['file'],extra['title'],content)
+page('404.html','Page not found',intro('Page not found','This page may have moved.')+link('Return home →','index.html'))
 (OUT/'admin').mkdir(exist_ok=True)
 shutil.copy2(ROOT/'editor/index.html', OUT/'admin/index.html')
 (OUT/'admin/editor-data.json').write_text(json.dumps(editor_bundle(ROOT),ensure_ascii=False))
 (OUT/'admin/editor-schema.json').write_text(json.dumps(editor_sections,ensure_ascii=False))
 (OUT/'assets/design.xml').write_text(to_xml(design_settings),encoding='utf-8')
-(OUT/'admin/design-defaults.json').write_text(json.dumps(default_design(),ensure_ascii=False))
 (OUT/'.nojekyll').touch()
 (OUT/'assets'/'publications.bib').write_text('\n\n'.join(bib(p) for p in papers)+'\n')
 print(f'Built {len(list(OUT.rglob("*.html")))} pages, {len(papers)} papers and {len(news)} news items.')

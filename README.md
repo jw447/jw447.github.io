@@ -1,26 +1,19 @@
 # Jinzhen Wang / HPDi Lab website
 
-## Install this complete source package
+## Checkout and authentication
 
-Merge the contents of this folder into your existing Git checkout. Preserve its
-`.git/` directory. On macOS, use `rsync -av /path/to/extracted/jwang-hpc.github.io/ ./`
-from your repository root; do not use `--delete`.
-
-For the first installation, review and commit the changed source before starting
-the editor, because startup refuses to pull over uncommitted changes:
+Use the local-design branch of jwang-hpc/jwang-hpc.github.io. Use your existing
+GitHub authentication; credentials are never stored in website source.
 
 ```bash
+git fetch origin
 git switch local-design
-git status --short
-git add edit.py scripts editor assets tests README.md AGENTS.md
-git commit -m "Simplify content editor and sync GitHub review branch"
-git push -u origin local-design
+git pull --ff-only origin local-design
 python3 edit.py
 ```
 
-Use your existing GitHub authentication. No credentials are stored in website
-source. The origin URL should be
-`https://github.com/jwang-hpc/jwang-hpc.github.io.git`.
+Pull manually with a clean checkout. Saved edits on local-design can be reopened
+without committing or publishing.
 
 ## Daily content editing
 
@@ -87,9 +80,8 @@ python3 scripts/check_site.py
 
 The Pages workflow belongs in `.github/workflows/pages.yml`. Settings → Pages →
 Source must be GitHub Actions. Keep `dist/`, caches and `.editor-state/` ignored.
-`content/legacy.json` preserves only listed older resources; do not list deleted
-files there. This package retains your uploaded content and website templates.
-GitHub and the separate ChatGPT demo do not automatically synchronize.
+The build removes previous dist output before generating the current pages, so
+retired demo pages and assets cannot remain in deployment.
 
 ## CV, update date and citations
 
