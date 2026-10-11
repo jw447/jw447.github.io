@@ -177,12 +177,12 @@
   function setupAssistant() {
     if (local) {
       $('assistant-model').value = local.assistant.model;
-      $('assistant-connection').textContent = local.assistant.configured ? 'API key is configured on the local server. Send a request to verify access.' : 'Add your API key for this session, or set OPENAI_API_KEY before startup.';
+      $('assistant-connection').textContent = local.assistant.configured ? 'API key is configured on the local server. Send a request to verify access.' : 'Add your API key, or set OPENAI_API_KEY before startup.';
     } else { for (const id of ['assistant-connect-button','assistant-send','assistant-publish']) $(id).disabled = true; }
     $('assistant-connect-button').addEventListener('click', () => assistantOperation('Configuring assistant…', async () => {
       const key = $('assistant-key').value; $('assistant-key').value = '';
-      const status = await assistantCall('design-configure', {key, model:$('assistant-model').value}); local.assistant = status;
-      $('assistant-connection').textContent = 'API key configured for this server session. Send a request to verify access.'; $('assistant-connect').open = false;
+      const status = await assistantCall('design-configure', {key, model:$('assistant-model').value, remember:$('assistant-remember').checked}); local.assistant = status;
+      $('assistant-connection').textContent = status.remembered ? 'API key saved on this computer. It will load automatically on restart.' : 'API key configured for this session.'; $('assistant-connect').open = false;
     }));
     $('assistant-send').addEventListener('click', () => assistantOperation('Asking the design assistant…', async () => {
       const message = $('assistant-message').value.trim(); if (!message) throw new Error('Describe your design change first.');

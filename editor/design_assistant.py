@@ -29,13 +29,18 @@ def validate_css(css):
 class DesignAssistant:
     def __init__(self, root):
         self.root = root
-        self.key = os.environ.get('OPENAI_API_KEY', '')
-        self.model = os.environ.get('OPENAI_DESIGN_MODEL', 'gpt-5.4')
+        self.credentials_path = self.root / '.editor-state' / 'openai-credentials.json'
+        saved = {}
+        if self.credentials_path.exists():
+            try: saved = json.loads(self.credentials_path.read_text())
+            except (OSError, ValueError): pass
+        self.key = os.environ.get('OPENAI_API_KEY') or saved.get('key', '')
+        self.model = os.environ.get('OPENAI_DESIGN_MODEL') or saved.get('model', 'gpt-5.4')
         self.history = []
         self.proposal = None
 
     def status(self):
-        return dict(configured=bool(self.key), model=self.model)
+        return dict(configured=bool(self.key), model=self.model, remembered=self.credentials_path.exists())
 
     def configure(self, payload):
         key = payload.get('key', '').strip()
@@ -43,6 +48,16 @@ class DesignAssistant:
             raise ValueError('Enter a valid OpenAI API key.')
         model = payload.get('model', self.model).strip()
         if not re.fullmatch(r'[a-zA-Z0-9_.-]{1,100}', model): raise ValueError('Invalid model name.')
+        if payload.get('remember'):
+            self.credentials_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            temporary = self.credentials_path.with_suffix('.tmp')
+            fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            os.chmod(temporary, 0o600)
+            with os.fdopen(fd, 'w') as stream:
+                json.dump(dict(key=key, model=model), stream)
+            temporary.replace(self.credentials_path)
+        else:
+            self.credentials_path.unlink(missing_ok=True)
         self.key, self.model = key, model
         return dict(ok=True, **self.status())
 

@@ -115,9 +115,12 @@ again. These reminders appear in the editor; no background/email reminder runs.
 ## Embedded design assistant
 
 Choose Design changes in the local editor. Under API connection, enter your
-OpenAI API key and use it for this session, or set OPENAI_API_KEY before startup.
-The default model is gpt-5.4; OPENAI_DESIGN_MODEL can override it. Keys stay in
-server memory, never in source, browser storage, exported drafts or GitHub.
+OpenAI API key and leave Remember on this computer checked to load it on restart.
+It is saved in .editor-state/openai-credentials.json with owner-only permissions,
+excluded from GitHub, previews and exports. Uncheck Remember and reconnect to
+remove the saved key. Alternatively set OPENAI_API_KEY before startup.
+The default model is gpt-5.4; OPENAI_DESIGN_MODEL can override it. Keys are never
+returned to the browser or stored in browser storage.
 You need your own OpenAI API account/billing. This is a separate API assistant,
 not a connection to an existing ChatGPT conversation or subscription.
 

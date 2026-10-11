@@ -55,8 +55,9 @@ After Publish, confirm remote receipt by fetching and checking commit ancestry, 
 
 ## Embedded design assistant exception
 The owner authorized a separate Design changes section using their OpenAI API
-key. Keep content forms free of design sliders. API keys remain local server
-memory only; never serialize them to status, browser storage, source or exports.
+key. Keep content forms free of design sliders. API keys may be remembered only in ignored .editor-state/openai-credentials.json
+with owner-only permissions, as authorized by the owner. Never serialize keys
+to status, browser storage, tracked source, previews or exports.
 Use the Responses API with structured proposals. Chat/preview never mutate
 source. Apply only validated design JSON and a CSS override after explicit user
 action, with backups and source-revision checks. Do not execute model-generated
