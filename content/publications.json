@@ -13,7 +13,7 @@
         "url": "https://arxiv.org/abs/2512.21433"
       }
     ],
-    "note": "The linked arXiv preprint uses an earlier title. BibTeX cites that preprint until conference metadata is available.",
+    "note": "",
     "citation_source": "https://arxiv.org/abs/2512.21433",
     "bibtex": "@misc{deepcq2026,\n  title = {{DeepCQ: General-Purpose Deep-Surrogate Framework for Lossy Compression Quality Prediction}},\n  author = {Mumenin, Khondoker Mirazul and Underwood, Robert and Dai, Dong and Wang, Jinzhen and Di, Sheng and Lukić, Zarija and Cappello, Franck},\n  year = {2025},\n  eprint = {2512.21433},\n  archivePrefix = {arXiv},\n  primaryClass = {cs.LG},\n  doi = {10.48550/arXiv.2512.21433},\n  url = {https://arxiv.org/abs/2512.21433},\n  note = {Preprint; conference citation metadata not yet verified}\n}"
   },
