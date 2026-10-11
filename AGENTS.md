@@ -50,3 +50,5 @@ manual pushes to local-design; it must never write main.
 Use verified publisher DOI metadata for citations, or a pasted Scholar/IEEE/ACM
 BibTeX export. Do not fabricate pages, DOI, year or conference metadata. DeepCQ
 currently cites its verified arXiv preprint until publisher metadata is available.
+
+After Publish, confirm remote receipt by fetching and checking commit ancestry, not only Git exit status. Keep pending commits on failures. The editor status panel checks on opening, periodically while visible, and on request; preserve reminders for saved/unpushed/unconfirmed work.

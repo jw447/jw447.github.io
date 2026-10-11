@@ -99,3 +99,15 @@ publisher-deposited Crossref metadata; review it before saving. Google Scholar,
 IEEE and ACM BibTeX exports can also be pasted into the same field. The build
 uses that BibTeX, then verified DOI metadata, then a minimal local fallback.
 Only the current design is built; compact.json and retired demo assets are removed.
+
+## GitHub push confirmation
+
+The local editor checks GitHub on opening, every minute while visible, and via
+Check GitHub. Publish confirms that the saved commit is present in the remote
+local-design history, including when the date-stamping bot has added a newer
+commit. A successful Git command alone is not treated as confirmation.
+The status panel distinguishes confirmed, saved/unpublished, unpushed, behind,
+diverged and unconfirmed states, with a last-check time. Failed or uncertain
+pushes keep their pending commit for retry and show a reminder; closing the
+editor also warns about saved/unpushed or unconfirmed work. Reopening checks
+again. These reminders appear in the editor; no background/email reminder runs.

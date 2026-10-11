@@ -69,6 +69,46 @@ class Editor:
         except (EditorError, subprocess.TimeoutExpired, FileNotFoundError):
             return dict(ready=False, reason='Publishing needs Git and a local checkout of the GitHub website repository.')
 
+    def push_status(self, payload=None):
+        status = self.publishing_status()
+        if not status['ready']:
+            return dict(state='unavailable', message=status['reason'], confirmed=False)
+        try:
+            self.git('fetch', 'origin', timeout=20)
+            remote_line = self.git('ls-remote', 'origin', 'refs/heads/' + PUBLISH_BRANCH, timeout=20)
+            if not remote_line:
+                return dict(state='unpushed', confirmed=False, message='local-design is not on GitHub yet. Click Publish to push it.')
+            remote = remote_line.split()[0]
+            fetched = self.git('rev-parse', 'refs/remotes/origin/' + PUBLISH_BRANCH)
+            if remote != fetched:
+                return dict(state='unconfirmed', confirmed=False, message='GitHub changed during the check. Check again to confirm your push.')
+            local = self.git('rev-parse', 'HEAD')
+            ahead, behind = map(int, self.git('rev-list', '--left-right', '--count', 'HEAD...' + fetched).split())
+            pending = json.loads(self.pending_path.read_text()) if self.pending_path.exists() else None
+            wanted = pending['commit'] if pending else local
+            received = subprocess.run(['git', '-C', str(self.root), 'merge-base', '--is-ancestor', wanted, fetched], capture_output=True).returncode == 0
+            checked = datetime.now(timezone.utc).isoformat()
+            if pending and received:
+                self.pending_path.unlink(missing_ok=True)
+            dirty = bool(self.git('status', '--porcelain'))
+            state = 'synced'
+            message = 'GitHub confirmed commit ' + wanted[:7] + ' on local-design.'
+            if ahead and behind:
+                state, message = 'diverged', 'Local and GitHub commits have diverged. Reconcile local-design before publishing.'
+            elif ahead:
+                state, message = 'unpushed', f'{ahead} local commit(s) have not reached GitHub. Click Publish to push them.'
+            elif dirty:
+                state, message = 'saved', 'Saved local changes have not been pushed. Click Publish when ready.'
+            elif behind:
+                state, message = 'behind', 'Your commit is confirmed on GitHub; newer remote changes are available. Reopen with a clean checkout to pull them.'
+            if pending and not received:
+                state, message = 'unpushed', 'Your previous push is not confirmed. Click Publish to retry the saved commit.'
+            return dict(state=state, message=message, confirmed=received, local_commit=local,
+                        remote_commit=remote, checked_at=checked, ahead=ahead, behind=behind)
+        except (EditorError, subprocess.TimeoutExpired, ValueError, OSError):
+            return dict(state='unconfirmed', confirmed=False,
+                        message='GitHub push status could not be verified. Check authentication/network, then Check GitHub or retry Publish. Local files are preserved.')
+
     def candidate(self, payload, publishing=False):
         if not isinstance(payload, dict) or payload.get('schema_version') != 1:
             raise EditorError('Import an editor content package, version 1.')
@@ -189,7 +229,15 @@ class Editor:
             if (self.root / CV_PATH).exists(): paths.append(CV_PATH)
             self.git('add', '--', *paths)
             if not self.git('diff', '--cached', '--name-only'):
-                return dict(ok=True, message='No content changes to publish.', bundle=saved['bundle'])
+                checked = self.push_status()
+                if checked.get('confirmed'):
+                    return dict(ok=True, message='No content changes to publish.', bundle=saved['bundle'], push_status=checked)
+                if checked.get('state') != 'unpushed':
+                    raise EditorError(checked['message'], 409, push_status=checked)
+                pending = dict(commit=self.git('rev-parse', 'HEAD'), branch=PUBLISH_BRANCH)
+                self.state.mkdir(exist_ok=True)
+                self.pending_path.write_text(json.dumps(pending))
+                return self.publish(saved['bundle'])
             try:
                 self.git('commit', '-m', summarize_changes(committed_content, read_content(self.root)) + ('\n- CV: upload PDF' if CV_PATH in self.git('diff', '--cached', '--name-only').splitlines() else ''))
             except EditorError:
@@ -201,8 +249,11 @@ class Editor:
             self.git('push', 'origin', 'HEAD:' + PUBLISH_BRANCH, timeout=45)
         except (EditorError, subprocess.TimeoutExpired):
             raise EditorError('The content commit is saved locally, but GitHub did not confirm the push. Check authentication/network and click Publish again to retry this commit.', 409, saved=True, committed=True, commit=pending['commit'], bundle=bundle(self.root))
+        checked = self.push_status()
+        if not checked.get('confirmed'):
+            raise EditorError('Git returned from push, but GitHub receipt is not confirmed. Check GitHub or click Publish again to retry.', 409, saved=True, committed=True, commit=pending['commit'], bundle=bundle(self.root), push_status=checked)
         self.pending_path.unlink(missing_ok=True)
-        return dict(ok=True, commit=pending['commit'], bundle=bundle(self.root), message='Pushed to local-design. Merge its pull request into main to update the live website.')
+        return dict(ok=True, push_status=checked, commit=pending['commit'], bundle=bundle(self.root), message='GitHub confirmed your push to local-design (' + pending['commit'][:7] + '). Merge into main when ready to deploy.')
 
 
 def make_handler(editor):
@@ -256,7 +307,7 @@ def make_handler(editor):
             if not editor.lock.acquire(blocking=False): return self.reply(dict(error='Another editor operation is running. Try again when it finishes.'), 409)
             try:
                 payload = json.loads(self.rfile.read(length))
-                action = {'/api/preview': editor.preview_content, '/api/save': editor.save, '/api/publish': editor.publish, '/api/upload-cv': editor.upload_cv, '/api/bibtex': editor.lookup_bibtex}.get(urlparse(self.path).path)
+                action = {'/api/preview': editor.preview_content, '/api/save': editor.save, '/api/publish': editor.publish, '/api/upload-cv': editor.upload_cv, '/api/bibtex': editor.lookup_bibtex, '/api/push-status': editor.push_status}.get(urlparse(self.path).path)
                 if not action: raise EditorError('Unknown editor action.', 404)
                 self.reply(action(payload))
             except EditorError as error: self.reply(dict(error=str(error), **error.extra), error.status)

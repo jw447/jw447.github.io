@@ -16,6 +16,7 @@
     $('draft-count').textContent = names.length ? `${names.length} content ${names.length === 1 ? 'file' : 'files'} changed` : 'No changes';
     $('save-status').textContent = names.length ? 'Draft saved in this browser' : 'Current content';
     if (crossTab) $('save-status').textContent = 'Another tab changed this draft';
+    if (local?.push_status) renderGitHubStatus();
   }
   function persist() {
     updateStatus();
@@ -136,15 +137,38 @@
   async function api(action) {
     const response = await fetch(`/api/${action}`, {method:'POST', headers:{'Content-Type':'application/json','X-Editor-Token':local.token}, body:JSON.stringify(draft)});
     const result = await response.json();
-    if (!response.ok) { if (result.bundle) adopt(result.bundle); if (result.errors) showErrors(result.errors); throw new Error(result.error || 'The operation did not complete.'); }
+    if (!response.ok) { if (action === 'publish') showPushStatus(result.push_status || {state:'unconfirmed', confirmed:false, message:result.error + ' Please retry Publish when the issue is resolved.'}); if (result.bundle) adopt(result.bundle); if (result.errors) showErrors(result.errors); throw new Error(result.error || 'The operation did not complete.'); }
+    if (result.push_status) showPushStatus(result.push_status);
     return result;
+  }
+  let checkingGitHub = false;
+  function showPushStatus(status) {
+    local.push_status = status; renderGitHubStatus();
+  }
+  function renderGitHubStatus() {
+    const status = local.push_status;
+    const unpublishedDraft = draft && M.changed(draft.content, baseline).length;
+    $('github-status').textContent = status.message + (unpublishedDraft ? ' Browser draft changes have not been published.' : '') + (status.checked_at ? ' Checked ' + new Date(status.checked_at).toLocaleTimeString() + '.' : '');
+    $('github-status-panel').dataset.state = unpublishedDraft && status.state === 'synced' ? 'draft' : status.state;
+  }
+  async function checkGitHub() {
+    if (!local || busy || checkingGitHub) return;
+    checkingGitHub = true; $('check-github').disabled = true;
+    try {
+      const response = await fetch('/api/push-status', {method:'POST', headers:{'Content-Type':'application/json','X-Editor-Token':local.token}, body:'{}'});
+      const status = await response.json(); if (!response.ok) throw new Error(status.error);
+      showPushStatus(status);
+    } catch(error) { showPushStatus({state:'unconfirmed', confirmed:false, message:'Cannot confirm the GitHub push. Check the connection, then retry Check GitHub or Publish.'}); }
+    finally { checkingGitHub = false; $('check-github').disabled = false; }
   }
   function adopt(value) { seed = M.clone(value); baseline = M.clone(value.content); draft = M.clone(value); persist(); }
   async function operation(action, fn) {
-    if (busy || crossTab) return; busy = true;
+    if (busy || crossTab) return;
+    if (checkingGitHub) { notice('GitHub status is being checked. Try this action when the check finishes.'); return; }
+    busy = true;
     for (const id of ['preview-button','save-button','confirm-publish']) $(id).disabled = true;
     $('save-status').textContent = action;
-    try { await fn(); } catch(error) { report(error); }
+    try { await fn(); } catch(error) { if (action.startsWith('Publishing')) showPushStatus({state:'unconfirmed', confirmed:false, message:'Push was not confirmed. ' + (error.message || 'Check your connection.') + ' Retry Publish when ready.'}); report(error); }
     finally { busy = false; updateStatus(); for (const id of ['preview-button','save-button','confirm-publish']) $(id).disabled = false; }
   }
   function download() {
@@ -159,6 +183,7 @@
     if (local) { $('save-button').hidden = false; $('mode-note').textContent = 'Save writes checked content on this computer. Publish commits and pushes local-design; merge into main to deploy.'; }
     for (const item of schema.filter(item => item.key !== 'design')) { const node = button(item.label,()=>choose(item.key)); node.dataset.section = item.key; $('sections').append(node); }
     choose('profile'); updateStatus();
+    if (local) { $('github-status-panel').hidden = false; $('check-github').addEventListener('click', checkGitHub); checkGitHub(); setInterval(() => { if (!document.hidden) checkGitHub(); }, 60000); }
     $('content-form').addEventListener('submit',event=>event.preventDefault());
     $('record-search').addEventListener('input',updateRecordLabels);
     $('add-button').addEventListener('click',()=>{ records().unshift(M.newRecord(section)); index=0; changed(); renderForm(); updateRecordLabels(); });
@@ -171,7 +196,7 @@
     $('reset-button').addEventListener('click',async()=>{ if(!confirm('Load current content and replace this browser draft? Download your updates first if you need them.'))return; try{ if(local){const response=await fetch('/api/status');const status=await response.json();if(!response.ok)throw new Error('Current content could not be loaded.');local=status;seed=status.bundle;}crossTab=false;adopt(seed);choose(section.key);notice('Current content loaded.');}catch(error){report(error);} });
     async function preview() { if(!check())return; if(!local){notice('Exact draft previews require the local editor. Run python3 edit.py, then import this draft. View current site shows the published page.');return;} await operation('Generating preview…',async()=>{ $('edit-panel').hidden=true;$('preview-panel').hidden=false;if(local){const result=await api('preview');exactPreview=true;$('preview-frame').removeAttribute('srcdoc');$('preview-frame').src=result.preview_url.replace('index.html',$('preview-page').value)+`?draft=${Date.now()}`;$('preview-caption').textContent='Draft preview · current website design';} }); }
     $('preview-button').addEventListener('click',preview);$('preview-page').addEventListener('change',preview);$('back-button').addEventListener('click',()=>{$('edit-panel').hidden=false;$('preview-panel').hidden=true;});
-    $('save-button').addEventListener('click',()=>{if(check())operation('Saving and checking…',async()=>{const result=await api('save');adopt(result.bundle);notice('Content saved on this computer. Publish when you are ready to update GitHub.');});});
+    $('save-button').addEventListener('click',()=>{if(check())operation('Saving and checking…',async()=>{const result=await api('save');adopt(result.bundle);notice('Content saved on this computer. Publish when you are ready to update GitHub.'); showPushStatus({state:'saved', confirmed:false, message:'Saved changes have not been pushed. Click Publish when ready.'});});});
     $('publish-button').addEventListener('click',()=>{
       if(!check())return; const container=$('publish-content');container.replaceChildren();$('confirm-publish').hidden=true;
       if(local?.publishing.ready){const names=M.changed(draft.content,baseline);container.append(text('p',names.length?'This will save and validate your changes, create a commit summarizing the changes, and push local-design to GitHub. Merge into main to deploy.':'No draft changes. Publish can retry a previously saved commit.'));const list=document.createElement('ul');names.forEach(name=>list.append(text('li',name)));container.append(list);container.append(text('p',local.publishing.repository,'publish-reason'));$('confirm-publish').hidden=false;}
@@ -184,6 +209,6 @@
     function syncPreviewTheme() { try { const root=$('preview-frame').contentDocument?.documentElement;if(root)root.dataset.theme=document.documentElement.dataset.theme || 'light'; } catch { /* A preview link may have navigated away. */ } }
     $('preview-frame').addEventListener('load',syncPreviewTheme);
     new MutationObserver(()=>{if(!$('preview-panel').hidden){if(exactPreview)syncPreviewTheme();}}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-    window.addEventListener('beforeunload',event=>{if($('save-status').textContent==='Draft is in memory only'){event.preventDefault();event.returnValue='';}});
+    window.addEventListener('beforeunload',event=>{if($('save-status').textContent==='Draft is in memory only' || (local?.push_status && ['unpushed','saved','unconfirmed','diverged'].includes(local.push_status.state))){event.preventDefault();event.returnValue='';}});
   } catch(error) { report(error);$('save-status').textContent='Editor could not start';for(const node of document.querySelectorAll('.toolbar button'))node.disabled=true; }
 })();
