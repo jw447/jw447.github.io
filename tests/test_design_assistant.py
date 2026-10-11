@@ -18,6 +18,8 @@ class DesignAssistantTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name) / 'site'
         shutil.copytree(ROOT, self.root, ignore=shutil.ignore_patterns('.git', 'dist', '.editor-state', '__pycache__', '.openai'))
+        # These cases exercise creation of a new override, independent of live styling.
+        (self.root / CSS_PATH).unlink(missing_ok=True)
         subprocess.run(['python3', 'build.py'], cwd=self.root, check=True, capture_output=True)
         self.editor = Editor(self.root)
         self.editor.assistant.key = ''

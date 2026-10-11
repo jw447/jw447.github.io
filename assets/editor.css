@@ -9,3 +9,5 @@ small{font-size:inherit}
 .assistant-chat{display:grid;gap:1rem;margin-block:1rem;max-height:min(440px,50vh);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;align-content:start;padding-right:.5rem}.assistant-message{padding:1rem;background:var(--accent-soft);border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}.assistant-message strong{display:block;margin-bottom:.5rem}.assistant-actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-block:1rem}#assistant-diff{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--accent-soft);padding:1rem;font-size:inherit}#assistant-frame{width:100%;height:70vh;border:1px solid var(--line);margin-block:1rem}#assistant-connect{padding:1rem;border:1px solid var(--line);margin-bottom:1rem}
 
 .richtext-toolbar{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+
+.notice,.errors{position:relative;padding-right:3.5rem}.notification-close{position:absolute;right:.5rem;top:.5rem;line-height:1;padding:.4rem .6rem;font-size:1.3rem}
