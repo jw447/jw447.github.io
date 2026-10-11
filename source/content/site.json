@@ -1,0 +1,47 @@
+{
+  "font": "optima",
+  "student_authors": [
+    "Khondoker Mirazul Mumenin"
+  ],
+  "navigation": [
+    {
+      "label": "About",
+      "kind": "section",
+      "target": "about"
+    },
+    {
+      "label": "News",
+      "kind": "section",
+      "target": "news"
+    },
+    {
+      "label": "Papers",
+      "kind": "section",
+      "target": "papers"
+    },
+    {
+      "label": "Teaching",
+      "kind": "section",
+      "target": "teaching"
+    },
+    {
+      "label": "HPDi Lab",
+      "kind": "page",
+      "target": "lab.html"
+    }
+  ],
+  "extra_pages": [
+    {
+      "file": "demos.html",
+      "title": "Research demos",
+      "description": "Interactive research demonstrations and software examples will appear here.",
+      "items": []
+    },
+    {
+      "file": "seminars.html",
+      "title": "Seminars",
+      "description": "Upcoming seminars and past talks will appear here.",
+      "items": []
+    }
+  ]
+}

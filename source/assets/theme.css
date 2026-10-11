@@ -1,0 +1,36 @@
+.theme-toggle {
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px;
+  width: 40px;
+  height: 40px;
+  background: var(--paper);
+  color: var(--accent);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.theme-toggle:hover { background: var(--accent-soft); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.theme-toggle[hidden] { display: none; }
+@media (max-width: 700px) {
+  .header-inner .theme-toggle { order: 0; margin-left: 10px; }
+  .header-inner #site-nav { order: 1; }
+}
+@media (max-width: 640px) {
+  .header-row .theme-toggle { margin-left: auto; }
+  .header-row .nav { order: 1; }
+}
+@media print {
+  .theme-toggle { display: none; }
+  :root { --paper: #fff !important; --ink: #252b2a !important; --muted: #626d68 !important; --line: #dce2de !important; --accent: #005035 !important; --gold: #a49665 !important; --accent-soft: #eef4f1 !important; color-scheme: light !important; }
+}
+
+/* Sun offers light mode; moon offers dark mode. Labels stay accessible. */
+.theme-icon{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+html:not([data-theme="dark"]) .theme-sun,html[data-theme="dark"] .theme-moon{display:none}

@@ -1,0 +1,56 @@
+{
+  "name": "Jinzhen Wang",
+  "name_chinese": "王金震",
+  "role": "Assistant Professor",
+  "department": "Department of Computer Science",
+  "university": "University of North Carolina at Charlotte",
+  "email": "jwang96@charlotte.edu",
+  "office": "Woodward Hall 210B",
+  "lab": "HPDi Lab",
+  "lab_name": "High-Performance Data Intensive Lab",
+  "scholar": "https://scholar.google.com/citations?user=otnPh2IAAAAJ",
+  "github": "https://github.com/HPDiL",
+  "cv": "https://drive.google.com/file/d/1UbU2fyAm66DMOtgDUPaxLLk3Fc0ltI1K/view",
+  "site_url": "https://jw447.github.io",
+  "updated": "October 10, 2026",
+  "bio": [
+    "I am an Assistant Professor in the Department of Computer Science at UNC Charlotte, where I lead the High-Performance Data Intensive (HPDi) Lab. My research focuses on high-performance computing and scientific data management, with an emphasis on data reduction, compression, and parallel and distributed systems.",
+    "I received my Ph.D. from the New Jersey Institute of Technology, advised by Qing Liu, and my bachelor's degree from Shandong University. I was a research intern at Los Alamos National Laboratory from 2022 to 2023. I am also affiliated with the High Performance Computing and Systems Lab at UNC Charlotte."
+  ],
+  "interests": [
+    "Data reduction and compression",
+    "Scientific data management",
+    "Parallel and distributed systems"
+  ],
+  "education": [
+    {
+      "degree": "Ph.D., Electrical Engineering",
+      "school": "New Jersey Institute of Technology",
+      "year": "2018–2023"
+    },
+    {
+      "degree": "M.S., Electrical Engineering",
+      "school": "New Jersey Institute of Technology",
+      "year": "2015–2017"
+    },
+    {
+      "degree": "B.S., Internet of Things",
+      "school": "Shandong University",
+      "year": "2011–2015"
+    }
+  ],
+  "service": [
+    {
+      "heading": "Organization and panels",
+      "text": "NRDPISI workshop organizer, 2024–2025. NSF and DOE panelist, 2024."
+    },
+    {
+      "heading": "Conference reviewing",
+      "text": "ICDE, 2022–2025. SDM, 2024. CCGrid, 2024. ICPP poster track, 2024."
+    },
+    {
+      "heading": "Journal reviewing",
+      "text": "Journal of Parallel and Distributed Computing, The Journal of Supercomputing, IEEE Internet of Things Journal, and IEEE Transactions on Smart Grid."
+    }
+  ]
+}

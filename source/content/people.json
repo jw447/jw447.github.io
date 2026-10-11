@@ -1,0 +1,65 @@
+[
+  {
+    "name": "Khondoker Mirazul Mumenin",
+    "role": "Ph.D. student",
+    "group": "Students",
+    "bio": "Bachelor’s degree in Electronics and Communication Engineering from Khulna University, Bangladesh.",
+    "topic": "Machine learning for scientific data compression and efficient, scalable scientific computing workflows.",
+    "joined": "",
+    "url": "",
+    "source_url": "https://sites.google.com/charlotte.edu/hpdilab/team",
+    "approved": true,
+    "photo": "people/mumenin.jpg",
+    "keywords": []
+  },
+  {
+    "name": "Jiaxiang Zhang",
+    "role": "Ph.D. student",
+    "group": "Students",
+    "bio": "Dual bachelor’s degrees in Applied Mathematics and Information Science, with a minor in Data Science, from UNC Chapel Hill (2025).",
+    "topic": "",
+    "joined": "",
+    "url": "",
+    "source_url": "https://sites.google.com/charlotte.edu/hpdilab/team",
+    "approved": true,
+    "photo": "people/jiaxiang.png",
+    "keywords": []
+  },
+  {
+    "name": "Raivat Alwar",
+    "role": "M.S. student",
+    "group": "Alumni",
+    "bio": "Bachelor’s degree in Computer Science & Engineering from the University of California, Merced (2024).",
+    "topic": "",
+    "joined": "",
+    "url": "",
+    "source_url": "https://sites.google.com/charlotte.edu/hpdilab/team",
+    "approved": true,
+    "photo": "people/raivat.jpg",
+    "keywords": []
+  },
+  {
+    "name": "Aagat Pokhrel",
+    "role": "Ph.D. student",
+    "group": "Students",
+    "bio": "",
+    "topic": "",
+    "joined": "",
+    "url": "",
+    "approved": true,
+    "photo": "people/aagat.jpg",
+    "keywords": []
+  },
+  {
+    "name": "Adelina Zheng",
+    "role": "Summer REU student",
+    "group": "Alumni",
+    "bio": "Undergraduate student at Brown University.",
+    "topic": "",
+    "joined": "",
+    "url": "",
+    "approved": true,
+    "photo": "people/adelina.jpg",
+    "keywords": []
+  }
+]

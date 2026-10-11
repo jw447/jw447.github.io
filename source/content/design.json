@@ -1,0 +1,41 @@
+{
+  "typography": {
+    "body_font": "optima",
+    "heading_font": "optima",
+    "nav_font": "source-sans",
+    "body_size": 16,
+    "heading_size": 44,
+    "section_size": 26,
+    "chinese_size": 28,
+    "line_height": 1.6
+  },
+  "spacing": {
+    "paragraph_gap": 12,
+    "section_gap": 32,
+    "publication_gap": 18
+  },
+  "layout": {
+    "page_width": 1040,
+    "portrait_size": 168,
+    "portrait_position": "original",
+    "news_height": 320
+  },
+  "light": {
+    "accent": "#005035",
+    "gold": "#A49665",
+    "paper": "#FFFFFF",
+    "ink": "#252B2A",
+    "muted": "#626D68",
+    "line": "#DCE2DE",
+    "accent-soft": "#EEF4F1"
+  },
+  "dark": {
+    "accent": "#8FB9A0",
+    "gold": "#C3B387",
+    "paper": "#1B1B1B",
+    "ink": "#E8E4DC",
+    "muted": "#B2AEA6",
+    "line": "#3B3B3B",
+    "accent-soft": "#262626"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "bio": [
+    "I am an Assistant Professor of Computer Science at UNC Charlotte, leading the High-Performance Data Intensive (HPDi) Lab. My research focuses on high-performance computing and scientific data management, especially data reduction, compression, and parallel and distributed systems.",
+    "I earned my Ph.D. at NJIT with Qing Liu and my bachelor's degree at Shandong University. I interned at Los Alamos National Laboratory (2022–2023) and am affiliated with Charlotte's High Performance Computing and Systems Lab."
+  ],
+  "projects": {
+    "deepcq": "A two-stage deep-surrogate framework for predicting lossy compression quality. Reusable features support configuration selection across compressors, metrics, and scientific datasets without a full compression sweep.",
+    "qualitynet": "Fast surrogate models estimate compression quality to guide configuration choices for scientific datasets.",
+    "genesis": "Phase I research in the first DOE Genesis Mission cohort, connecting artificial intelligence and scientific computing."
+  }
+}
