@@ -52,3 +52,13 @@ BibTeX export. Do not fabricate pages, DOI, year or conference metadata. DeepCQ
 currently cites its verified arXiv preprint until publisher metadata is available.
 
 After Publish, confirm remote receipt by fetching and checking commit ancestry, not only Git exit status. Keep pending commits on failures. The editor status panel checks on opening, periodically while visible, and on request; preserve reminders for saved/unpushed/unconfirmed work.
+
+## Embedded design assistant exception
+The owner authorized a separate Design changes section using their OpenAI API
+key. Keep content forms free of design sliders. API keys remain local server
+memory only; never serialize them to status, browser storage, source or exports.
+Use the Responses API with structured proposals. Chat/preview never mutate
+source. Apply only validated design JSON and a CSS override after explicit user
+action, with backups and source-revision checks. Do not execute model-generated
+scripts or permit external resource imports in proposed CSS. Publish design only
+to local-design and confirm receipt. Never write main. Retain content drafts.

@@ -111,3 +111,30 @@ diverged and unconfirmed states, with a last-check time. Failed or uncertain
 pushes keep their pending commit for retry and show a reminder; closing the
 editor also warns about saved/unpushed or unconfirmed work. Reopening checks
 again. These reminders appear in the editor; no background/email reminder runs.
+
+## Embedded design assistant
+
+Choose Design changes in the local editor. Under API connection, enter your
+OpenAI API key and use it for this session, or set OPENAI_API_KEY before startup.
+The default model is gpt-5.4; OPENAI_DESIGN_MODEL can override it. Keys stay in
+server memory, never in source, browser storage, exported drafts or GitHub.
+You need your own OpenAI API account/billing. This is a separate API assistant,
+not a connection to an existing ChatGPT conversation or subscription.
+
+Describe the design change, inspect the proposed diff, then Preview proposal.
+Apply locally writes validated settings to content/design.json and styling to
+assets/assistant-design.css, with local backups. Content drafts are preserved.
+Publish applied design commits and pushes those reviewed files to local-design
+and verifies GitHub receipt. Publish saved content first if it is also modified;
+main is changed only by your own merge.
+
+The assistant receives current design settings, styles and rendered public
+Personal/Lab HTML, plus the design requests in this server session. It supports
+bounded settings and CSS, without executing generated scripts or rewriting
+Python templates. No files change merely by chatting or previewing. A stale
+proposal must be regenerated after source changes. Conversation/key state lasts
+until the local server is restarted. Larger structural changes can still be
+made through direct source work with Codex.
+
+The integration uses the OpenAI Responses API with structured outputs:
+https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses

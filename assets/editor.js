@@ -125,6 +125,7 @@
     $('move-up').disabled = index <= 0; $('move-down').disabled = !section.list || index >= records().length - 1;
   }
   function choose(key) {
+    $('design-assistant-panel').hidden = true; document.querySelector('.toolbar').hidden = false;
     section = schema.find(x => x.key === key); index = 0; $('record-search').value = '';
     for (const node of $('sections').children) node.setAttribute('aria-current', String(node.dataset.section === key));
     $('records-panel').hidden = !section.list; $('edit-panel').style.gridTemplateColumns = section.list ? '' : '1fr';
@@ -133,6 +134,70 @@
     $('preview-page').value = ['projects', 'people', 'lab', 'sponsors'].includes(key) ? 'lab.html' : 'index.html';
     $('edit-panel').hidden = false; $('preview-panel').hidden = true;
     renderForm(); updateRecordLabels();
+  }
+  let designProposal = null;
+  function showAssistant() {
+    $('edit-panel').hidden = true; $('preview-panel').hidden = true; $('design-assistant-panel').hidden = false;
+    document.querySelector('.toolbar').hidden = true; $('section-description').textContent = 'Discuss, review and preview changes to the current design.';
+    for (const node of $('sections').children) node.setAttribute('aria-current', String(node.textContent === 'Design changes'));
+  }
+  async function assistantCall(action, payload) {
+    const response = await fetch('/api/' + action, {method:'POST', headers:{'Content-Type':'application/json','X-Editor-Token':local.token}, body:JSON.stringify(payload)});
+    const result = await response.json();
+    if (result.push_status) showPushStatus(result.push_status);
+    if (!response.ok) throw new Error(result.error || 'The assistant operation failed.');
+    return result;
+  }
+  function appendChat(who, message) {
+    const entry = text('div', '', 'assistant-message'); entry.append(text('strong', who), text('div', message));
+    $('assistant-chat').append(entry); entry.scrollIntoView({block:'nearest'});
+  }
+  async function assistantOperation(label, callback) {
+    if (!local) { notice('Open the local editor with python3 edit.py to use the design assistant.'); return; }
+    if (busy || checkingGitHub) { notice('Wait for the current operation to finish, then try again.'); return; }
+    const controls = ['assistant-connect-button','assistant-send','assistant-preview','assistant-apply','assistant-publish'];
+    controls.forEach(id => $(id).disabled = true); $('assistant-progress').textContent = label;
+    try { await operation(label, callback); }
+    finally { controls.forEach(id => $(id).disabled = false); $('assistant-progress').textContent = ''; }
+  }
+  function setupAssistant() {
+    if (local) {
+      $('assistant-model').value = local.assistant.model;
+      $('assistant-connection').textContent = local.assistant.configured ? 'API key is configured on the local server. Send a request to verify access.' : 'Add your API key for this session, or set OPENAI_API_KEY before startup.';
+    } else { for (const id of ['assistant-connect-button','assistant-send','assistant-publish']) $(id).disabled = true; }
+    $('assistant-connect-button').addEventListener('click', () => assistantOperation('Configuring assistant…', async () => {
+      const key = $('assistant-key').value; $('assistant-key').value = '';
+      const status = await assistantCall('design-configure', {key, model:$('assistant-model').value}); local.assistant = status;
+      $('assistant-connection').textContent = 'API key configured for this server session. Send a request to verify access.'; $('assistant-connect').open = false;
+    }));
+    $('assistant-send').addEventListener('click', () => assistantOperation('Asking the design assistant…', async () => {
+      const message = $('assistant-message').value.trim(); if (!message) throw new Error('Describe your design change first.');
+      const result = await assistantCall('design-chat', {message});
+      appendChat('You', message); appendChat('Design assistant', result.answer); if ($('assistant-message').value.trim() === message) $('assistant-message').value = '';
+      designProposal = result.proposal; $('assistant-proposal').hidden = !designProposal; $('assistant-frame').hidden = true;
+      if (designProposal) $('assistant-diff').textContent = designProposal.diff || 'No visual changes proposed.';
+      $('assistant-connection').textContent = 'OpenAI API connection verified.';
+    }));
+    $('assistant-preview').addEventListener('click', () => assistantOperation('Building design preview…', async () => {
+      if (!designProposal) throw new Error('Ask for a proposal first.');
+      const result = await assistantCall('design-preview', {proposal_id:designProposal.id});
+      $('assistant-frame').src = result.preview_url + '?design=' + Date.now(); $('assistant-frame').hidden = false;
+    }));
+    $('assistant-apply').addEventListener('click', () => assistantOperation('Applying reviewed design…', async () => {
+      if (!designProposal) throw new Error('Ask for a proposal first.');
+      const result = await assistantCall('design-apply', {proposal_id:designProposal.id});
+      // Preserve browser content edits while updating their source revision and design.
+      const contentDraft = M.clone(draft.content); seed = M.clone(result.bundle); baseline = M.clone(seed.content);
+      draft = M.clone(seed); draft.content = contentDraft; draft.content.design = M.clone(seed.content.design); persist();
+      designProposal = null; $('assistant-proposal').hidden = true; notice(result.message);
+      showPushStatus({state:'saved', confirmed:false, message:'The applied design is local. Publish design to update local-design.'});
+    }));
+    $('assistant-publish').addEventListener('click', () => assistantOperation('Publishing design to GitHub…', async () => {
+      const result = await assistantCall('design-publish', {}); const contentDraft = M.clone(draft.content);
+      seed = M.clone(result.bundle); baseline = M.clone(seed.content); draft = M.clone(seed); draft.content = contentDraft;
+      draft.content.design = M.clone(seed.content.design); draft.content.profile.updated = seed.content.profile.updated; persist();
+      notice(result.message);
+    }));
   }
   async function api(action) {
     const response = await fetch(`/api/${action}`, {method:'POST', headers:{'Content-Type':'application/json','X-Editor-Token':local.token}, body:JSON.stringify(draft)});
@@ -182,7 +247,9 @@
     try { const saved = upgradeDraft(JSON.parse(localStorage.getItem(storageKey))); if (saved?.schema_version === 1 && !M.validate(saved.content,schema,baseline).length) { draft = saved; if (saved.base_revision !== seed.base_revision) notice('A saved draft is based on older content. Download it before loading current content; publishing will protect newer changes.'); } } catch { /* Start from the published content if there is no readable draft. */ }
     if (local) { $('save-button').hidden = false; $('mode-note').textContent = 'Save writes checked content on this computer. Publish commits and pushes local-design; merge into main to deploy.'; }
     for (const item of schema.filter(item => item.key !== 'design')) { const node = button(item.label,()=>choose(item.key)); node.dataset.section = item.key; $('sections').append(node); }
+    $('sections').append(button('Design changes', showAssistant));
     choose('profile'); updateStatus();
+    setupAssistant();
     if (local) { $('github-status-panel').hidden = false; $('check-github').addEventListener('click', checkGitHub); checkGitHub(); setInterval(() => { if (!document.hidden) checkGitHub(); }, 60000); }
     $('content-form').addEventListener('submit',event=>event.preventDefault());
     $('record-search').addEventListener('input',updateRecordLabels);
