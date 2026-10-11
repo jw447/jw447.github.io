@@ -34,10 +34,10 @@ test('imports cannot silently change navigation or omit sections', () => {
   delete data.people;
   assert.ok(errors(data).length);
 });
-test('editing short biography is detected and new student profiles stay hidden', () => {
-  const data = M.clone(baseline); data.compact.bio = ['A revised short biography.'];
+test('editing biography is detected and new student profiles stay hidden', () => {
+  const data = M.clone(baseline); data.profile.bio = ['A revised biography.'];
   assert.deepEqual(errors(data), []);
-  assert.deepEqual(M.changed(data, baseline), ['compact']);
+  assert.deepEqual(M.changed(data, baseline), ['profile']);
   assert.equal(M.newRecord(schema.find(x => x.key === 'people')).approved, false);
   const papers = schema.find(x => x.key === 'publications');
   assert.notEqual(M.newRecord(papers).id, M.newRecord(papers).id);

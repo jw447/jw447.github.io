@@ -42,7 +42,7 @@ def validate(data, baseline):
             errors.append(f'{label}: expected a record.')
             return
         for item in definitions:
-            if item.get('store') or item['type'] == 'compact':
+            if item.get('store'):
                 continue
             value = record.get(item['key'])
             prefix = f"{label} — {item['label']}"
@@ -64,6 +64,7 @@ def validate(data, baseline):
                     for index, child in enumerate(value): fields(child, item['fields'], f'{prefix} {index + 1}')
             elif not isinstance(value, str) or len(value) > 20000:
                 errors.append(prefix + ': invalid text.')
+            elif kind == 'pdf' and not (value == 'assets/cv/jinzhen-wang.pdf' or valid_url(value)): errors.append(prefix + ': upload a PDF.')
             elif kind == 'url' and not valid_url(value): errors.append(prefix + ': use a complete http(s) URL.')
             elif kind == 'email' and not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', value): errors.append(prefix + ': enter a valid email.')
             elif kind == 'month' and not re.fullmatch(r'\d{4}-(0[1-9]|1[0-2])', value): errors.append(prefix + ': enter YYYY-MM.')
@@ -99,9 +100,4 @@ def validate(data, baseline):
             if data[name].get(key) != baseline[name].get(key): errors.append(f'{name}: navigation and design settings cannot be changed through this editor.')
     authors = data['site'].get('student_authors') if isinstance(data['site'], dict) else None
     if not isinstance(authors, list) or not all(isinstance(x, str) and x.strip() for x in authors): errors.append('Student author names must be non-empty text.')
-    compact = data['compact']
-    if not isinstance(compact, dict) or not isinstance(compact.get('bio'), list) or not compact['bio'] or not all(isinstance(x, str) and x.strip() for x in compact['bio']):
-        errors.append('Compact biography is required.')
-    if not isinstance(compact, dict) or not isinstance(compact.get('projects'), dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in compact.get('projects', {}).items()):
-        errors.append('Compact project descriptions must be text.')
     return errors

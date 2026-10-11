@@ -90,3 +90,20 @@ Source must be GitHub Actions. Keep `dist/`, caches and `.editor-state/` ignored
 `content/legacy.json` preserves only listed older resources; do not list deleted
 files there. This package retains your uploaded content and website templates.
 GitHub and the separate ChatGPT demo do not automatically synchronize.
+
+## CV, update date and citations
+
+In Profile, choose a PDF under Curriculum vitae (maximum 10 MB). Upload writes
+`assets/cv/jinzhen-wang.pdf` locally; Save or Publish applies the link. Publish
+includes the PDF. The public CV button opens the PDF in an on-page viewer.
+The existing CV link remains until you upload a replacement.
+
+Publish sets the Last update label to the push day in America/New_York. Manual
+pushes to local-design are also stamped by stamp-updated.yml (a bot commit may
+appear; pull it before your next push). Merging main later preserves that date.
+
+Papers support a DOI and optional publisher BibTeX. Fetch publisher BibTeX uses
+publisher-deposited Crossref metadata; review it before saving. Google Scholar,
+IEEE and ACM BibTeX exports can also be pasted into the same field. The build
+uses that BibTeX, then verified DOI metadata, then a minimal local fallback.
+Only the current design is built; compact.json and retired demo assets are removed.

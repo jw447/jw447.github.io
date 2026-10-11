@@ -3,7 +3,7 @@
   'use strict';
   const M = window.HPDiEditorModel;
   const $ = id => document.getElementById(id);
-  const storageKey = 'hpdi-content-editor-v1';
+  const storageKey = 'hpdi-content-editor-v2';
   const text = (tag, value, className) => { const node = document.createElement(tag); node.textContent = value; if (className) node.className = className; return node; };
   const button = (label, action, className) => { const node = text('button', label, className); node.type = 'button'; node.addEventListener('click', action); return node; };
   let seed, schema, draft, baseline, local = null, section, index = 0, busy = false, crossTab = false, exactPreview = false;
@@ -48,8 +48,25 @@
   function renderFields(container, record, definitions) {
     for (const field of definitions) {
       const target = field.store ? draft.content[field.store] : record;
-      const getValue = () => field.type === 'compact' ? draft.content.compact.projects[record.id] || '' : target[field.key];
-      const setValue = value => { if (field.type === 'compact') draft.content.compact.projects[record.id] = value; else target[field.key] = value; changed(); };
+      const getValue = () => target[field.key];
+      const setValue = value => { target[field.key] = value; changed(); };
+      if (field.type === 'pdf') {
+        const label = text('label', '', 'field');
+        label.append(text('span', field.label), text('span', getValue() || 'No CV uploaded', 'field-hint'));
+        const upload = document.createElement('input'); upload.type = 'file'; upload.accept = '.pdf,application/pdf'; upload.disabled = !local;
+        label.append(upload, text('span', local ? 'Choose a PDF (up to 10 MB). Save or Publish to apply it.' : 'Open the local editor to upload your CV.', 'field-hint'));
+        upload.addEventListener('change', async () => {
+          const file = upload.files[0]; if (!file) return;
+          if (file.size > 10 * 1024 * 1024) { notice('CV must be at most 10 MB.'); return; }
+          try {
+            const encoded = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+            const response = await fetch('/api/upload-cv', {method:'POST', headers:{'Content-Type':'application/json','X-Editor-Token':local.token}, body:JSON.stringify({base_revision:draft.base_revision, data:encoded})});
+            const result = await response.json(); if (!response.ok) throw new Error(result.error);
+            setValue(result.path); notice('CV uploaded locally. Save or Publish to update the website.'); renderForm();
+          } catch(error) { report(error); }
+        });
+        container.append(label); continue;
+      }
       if (field.type === 'records') {
         const group = text('div', '', 'nested-field'); const heading = text('div', '', 'nested-heading');
         heading.append(text('span', field.label));
@@ -62,7 +79,7 @@
       const value = getValue(); let input;
       if (field.type === 'select') {
         input = document.createElement('select'); field.choices.forEach((choice, i) => { const option = text('option', field.labels?.[i] || choice); option.value = choice; input.append(option); }); input.value = value || '';
-      } else if (['textarea', 'lines', 'paragraphs', 'compact'].includes(field.type)) {
+      } else if (['textarea', 'lines', 'paragraphs'].includes(field.type)) {
         input = document.createElement('textarea'); input.rows = field.type === 'paragraphs' ? 7 : field.type === 'lines' ? 3 : 4;
         input.value = Array.isArray(value) ? value.join(field.type === 'paragraphs' ? '\n\n' : '\n') : value || '';
       } else {
@@ -79,7 +96,6 @@
       });
       if (field.type === 'checkbox') label.append(input, text('span', field.label)); else label.append(text('span', field.label + (field.required ? ' *' : '')), input);
       if (field.type === 'paragraphs') label.append(text('span', 'Separate paragraphs with a blank line.', 'field-hint'));
-      if (field.type === 'compact') label.append(text('span', 'Leave blank to use the full project description.', 'field-hint'));
       container.append(label);
     }
   }
@@ -92,6 +108,19 @@
     if (record) renderFields($('content-form'), record, section.fields);
     else $('content-form').append(text('p', 'Add an entry to start editing.', 'empty'));
     if (section.key === 'publications') renderFields($('student-authors'), draft.content.site, [{key:'student_authors',label:'Underlined student authors — one name per line',type:'lines'}]);
+    if (section.key === 'publications' && record) {
+      const fetchBib = button('Fetch publisher BibTeX', async () => {
+        fetchBib.disabled = true;
+        try {
+          const response = await fetch('/api/bibtex', {method:'POST', headers:{'Content-Type':'application/json','X-Editor-Token':local.token}, body:JSON.stringify({paper:record})});
+          const result = await response.json(); if (!response.ok) throw new Error(result.error);
+          record.doi = result.doi; record.bibtex = result.bibtex; record.citation_source = result.source; changed(); renderForm();
+          notice('Publisher citation loaded. Review the BibTeX before saving.');
+        } catch(error) { report(error); } finally { fetchBib.disabled = false; }
+      });
+      fetchBib.disabled = !local;
+      $('content-form').append(fetchBib, text('p', 'Lookup uses publisher DOI metadata. You can also paste a BibTeX export from Google Scholar, IEEE or ACM.', 'field-hint'));
+    }
     $('move-up').disabled = index <= 0; $('move-down').disabled = !section.list || index >= records().length - 1;
   }
   function choose(key) {

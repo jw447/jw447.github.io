@@ -7,7 +7,6 @@ import html
 import shutil
 from pathlib import Path
 from datetime import datetime
-from simple_layout import render as render_simple
 from publication_format import publication_label
 from editor.content import bundle as editor_bundle
 from editor.schema import SECTIONS as editor_sections
@@ -16,6 +15,7 @@ from editor.design_xml import to_xml
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / 'dist'
+if OUT.exists(): shutil.rmtree(OUT)
 OUT.mkdir(parents=True, exist_ok=True)
 shutil.copytree(ROOT / 'assets', OUT / 'assets', dirs_exist_ok=True)
 def load(name): return json.loads((ROOT / 'content' / (name+'.json')).read_text())
@@ -84,10 +84,7 @@ def newslist(items):
         rows.append(f'<li class="news-item"><time datetime="{n["date"]}">{date}</time><div><span class="news-kind">{e(n["kind"])}</span><p>{text}</p></div></li>')
     return '<ul class="news-list">'+''.join(rows)+'</ul>'
 
-def bib(p):
-    typ='article' if 'Transactions' in p['venue'] or 'Letters' in p['venue'] or 'Journal' in p['venue'] else 'inproceedings'
-    field='journal' if typ=='article' else 'booktitle'
-    return '@'+typ+'{'+p['id']+',\n  title = {'+p['title']+'},\n  author = {'+' and '.join(p['authors'].split(', '))+'},\n  '+field+' = {'+p['venue']+'},\n  year = {'+str(p['year'])+'}\n}'
+from bibliography import citation as bib
 
 def paperlist(items):
     rows=[]
@@ -101,7 +98,7 @@ def paperlist(items):
             author_parts.append(text)
         authors=', '.join(author_parts)
         links=''.join(link(x['label'],x['url']) for x in p.get('links',[]))
-        citation=f'<details class="citation"><summary>BibTeX</summary><pre>{e(bib(p))}</pre><button type="button" class="copy-citation">Copy citation</button></details>'
+        citation=f'<details class="citation"><summary>BibTeX</summary><pre>{e(bib(p))}</pre>{'<p>Publisher metadata not verified; citation uses the local record.</p>' if not p.get('bibtex') and not p.get('citation') else ''}<button type="button" class="copy-citation">Copy citation</button></details>'
         rows.append(f'''<article class="paper" data-year="{p['year']}"><div class="paper-venue">{e(publication_label(p))}</div><div class="paper-body"><h3>{e(p['title'])}</h3><p class="authors">{authors}</p><p class="venue-full">{e(p['venue'])}, {p['year']}</p><div class="paper-links">{links}{citation}</div>{f'<p class="paper-note">{e(p["note"])}</p>' if p.get('note') else ''}</div></article>''')
     return '<div class="paper-list">'+''.join(rows)+'</div>'
 
@@ -150,7 +147,7 @@ def sponsor_logo(sponsor,asset=None):
     return f'<a class="sponsor-logo-panel" href="{e(sponsor["url"])}"><img src="{prefix}{e(sponsor["logo"])}" alt="{e(sponsor["name"])} logo" width="240" height="96" loading="lazy"></a>'
 sponsor_cards=''.join(sponsor_logo(sponsor,asset=None) for sponsor in lab.get('sponsors',[]))
 labbody+=section('Sponsors','<p class="sponsor-thanks">'+e(lab['sponsor_thanks'])+'</p><div class="sponsor-grid">'+sponsor_cards+'</div>',anchor='sponsors')
-for design in ['classic','editorial']:
+for design in ['classic']:
     page('index.html','Home',(main_intro if design=='classic' else home_intro)+home_sections,design)
     page('news.html','News',newsbody,design)
     page('publications.html','Publications',pubbody,design)
@@ -167,11 +164,6 @@ for design in ['classic','editorial']:
             content+=f'<article class="project"><h2>{e(item["title"])}</h2><p>{e(item["description"])}</p>'+(link('Details →',item['url']) if item.get('url') else '')+'</article>'
         page(extra['file'],extra['title'],content,design)
     page('404.html','Page not found',intro('Page not found','This page may have moved.')+link('Return home →','index.html'),design)
-render_simple(OUT,profile,settings,lab,news,papers,teaching,projects,people,palette,design_settings=design_settings)
-compact_copy=load('compact')
-compact_profile={**profile,'bio':compact_copy['bio']}
-compact_projects=[{**project,'description':compact_copy['projects'].get(project['id'],project['description'])} for project in projects]
-render_simple(OUT,compact_profile,settings,lab,news,papers,teaching,compact_projects,people,palette,variant='compact',design_settings=design_settings)
 (OUT/'admin').mkdir(exist_ok=True)
 shutil.copy2(ROOT/'editor/index.html', OUT/'admin/index.html')
 (OUT/'admin/editor-data.json').write_text(json.dumps(editor_bundle(ROOT),ensure_ascii=False))
