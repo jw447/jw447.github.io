@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Build the current academic website with Python's standard library."""
+from news_format import render_news_text
 from person_cards import render_people
 from project_portfolio import project_cards, project_detail
 import json
@@ -78,7 +79,8 @@ def newslist(items):
     rows=[]
     for n in items:
         date=datetime.strptime(n['date'],'%Y-%m').strftime('%b %Y')
-        text=link(n['text'],n['url']) if n.get('url') else e(n['text'])
+        text=render_news_text(n['text'])
+        if n.get('url'): text=f'<a href="{e(n["url"])}">{text}</a>'
         rows.append(f'<li class="news-item"><time datetime="{n["date"]}">{date}</time><div><span class="news-kind">{e(n["kind"])}</span><p>{text}</p></div></li>')
     return '<ul class="news-list">'+''.join(rows)+'</ul>'
 

@@ -80,7 +80,7 @@
       const value = getValue(); let input;
       if (field.type === 'select') {
         input = document.createElement('select'); field.choices.forEach((choice, i) => { const option = text('option', field.labels?.[i] || choice); option.value = choice; input.append(option); }); input.value = value || '';
-      } else if (['textarea', 'lines', 'paragraphs'].includes(field.type)) {
+      } else if (['textarea', 'richtext', 'lines', 'paragraphs'].includes(field.type)) {
         input = document.createElement('textarea'); input.rows = field.type === 'paragraphs' ? 7 : field.type === 'lines' ? 3 : 4;
         input.value = Array.isArray(value) ? value.join(field.type === 'paragraphs' ? '\n\n' : '\n') : value || '';
       } else {
@@ -95,7 +95,21 @@
         if (field.type === 'paragraphs') value = value.split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
         setValue(value);
       });
+      if (field.type === 'richtext') {
+        const toolbar = text('div', '', 'richtext-toolbar'); toolbar.setAttribute('role', 'group'); toolbar.setAttribute('aria-label', 'Announcement formatting');
+        for (const [title, tag] of [['Bold', 'strong'], ['Italic', 'em'], ['Underline', 'u'], ['Strikethrough', 's']]) {
+          toolbar.append(button(title, () => {
+            const start = input.selectionStart, end = input.selectionEnd;
+            const selected = input.value.slice(start, end) || 'text';
+            input.setRangeText(`<${tag}>${selected}</${tag}>`, start, end, 'select');
+            setValue(input.value); input.focus();
+          }));
+        }
+        toolbar.append(button('Line break', () => { input.setRangeText('<br>', input.selectionStart, input.selectionEnd, 'end'); setValue(input.value); input.focus(); }));
+        container.append(toolbar);
+      }
       if (field.type === 'checkbox') label.append(input, text('span', field.label)); else label.append(text('span', field.label + (field.required ? ' *' : '')), input);
+      if (field.type === 'richtext') label.append(text('span', 'Select text and use the formatting buttons. Preview shows the formatted announcement.', 'field-hint'));
       if (field.type === 'paragraphs') label.append(text('span', 'Separate paragraphs with a blank line.', 'field-hint'));
       container.append(label);
     }
