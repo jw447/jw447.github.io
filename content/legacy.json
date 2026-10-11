@@ -1,12 +1,5 @@
 {
   "files": [
-    "_course_index.html",
-    "_cv.html",
-    "_index.html",
-    "_projects.html",
-    "_publications.html",
-    "_teaching.html",
-    "assets/main.css"
   ],
   "directories": ["files", "imgs"]
 }
