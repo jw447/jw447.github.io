@@ -141,3 +141,10 @@ made through direct source work with Codex.
 
 The integration uses the OpenAI Responses API with structured outputs:
 https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses
+
+### Upload a paper PDF
+Choose Papers, select a paper, and use Upload paper PDF (up to 10 MB).
+The file is saved as assets/papers/<record-id>.pdf and replaces the Paper link,
+while preserving DOI and other links. Preview and Save or Publish to apply the
+link; Publish includes uploaded PDFs on local-design. Existing PDFs are backed
+up before replacement. External paper URLs remain supported.

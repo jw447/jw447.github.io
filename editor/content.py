@@ -64,6 +64,7 @@ def validate(data, baseline):
                     for index, child in enumerate(value): fields(child, item['fields'], f'{prefix} {index + 1}')
             elif not isinstance(value, str) or len(value) > 20000:
                 errors.append(prefix + ': invalid text.')
+            elif kind == 'paperurl' and not (valid_url(value) or re.fullmatch(r'assets/papers/[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}\.pdf', value)): errors.append(prefix + ': use an http(s) URL or upload a paper PDF.')
             elif kind == 'pdf' and not (value == 'assets/cv/jinzhen-wang.pdf' or valid_url(value)): errors.append(prefix + ': upload a PDF.')
             elif kind == 'url' and not valid_url(value): errors.append(prefix + ': use a complete http(s) URL.')
             elif kind == 'email' and not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', value): errors.append(prefix + ': enter a valid email.')
