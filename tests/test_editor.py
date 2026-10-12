@@ -38,6 +38,24 @@ class EditorTests(unittest.TestCase):
         data['content']['news'].insert(0, dict(date='2026-10', kind='Update', text='Editor integration test announcement.', url=''))
         return data
 
+    def test_paper_upload_preview_backup_and_invalid_paths(self):
+        draft = bundle(self.root)
+        paper = draft['content']['publications'][0]
+        raw = b'%PDF-1.4\nexample\n%%EOF'
+        payload = dict(base_revision=draft['base_revision'], paper_id=paper['id'], data=base64.b64encode(raw).decode())
+        result = self.editor.upload_paper(payload)
+        paper['links'] = [dict(label='Paper', url=result['path'])]
+        self.assertFalse(validate(draft['content'], read_content(self.root)))
+        self.editor.preview_content(draft)
+        self.assertEqual((Path(self.editor.preview.name) / 'dist' / result['path']).read_bytes(), raw)
+        self.assertIn(result['path'], (Path(self.editor.preview.name) / 'dist/index.html').read_text())
+        self.editor.upload_paper(payload)
+        self.assertTrue(list((self.root / '.editor-state/backups').glob('*/' + paper['id'] + '.pdf')))
+        for invalid in (dict(payload, paper_id='../escape'), dict(payload, data=base64.b64encode(b'not pdf').decode()), dict(payload, base_revision='stale')):
+            with self.assertRaises(EditorError): self.editor.upload_paper(invalid)
+        paper['links'][0]['url'] = 'assets/papers/../../secret.pdf'
+        self.assertTrue(validate(draft['content'], read_content(self.root)))
+
     def test_preview_does_not_save_and_save_rebuilds_with_backup(self):
         before = read_content(self.root)
         draft = self.draft()

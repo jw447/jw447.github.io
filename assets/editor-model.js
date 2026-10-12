@@ -36,6 +36,7 @@
             break;
           default:
             if (typeof value !== 'string' || value.length > 20000) errors.push(`${name}: invalid text.`);
+            else if (field.type === 'paperurl' && !validURL(value) && !/^assets\/papers\/[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}\.pdf$/.test(value)) errors.push(`${name}: use an http(s) URL or upload a paper PDF.`);
             else if (field.type === 'pdf' && value !== 'assets/cv/jinzhen-wang.pdf' && !validURL(value)) errors.push(`${name}: upload a PDF.`);
             else if (field.type === 'url' && !validURL(value)) errors.push(`${name}: use a complete http(s) URL.`);
             else if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errors.push(`${name}: enter a valid email.`);

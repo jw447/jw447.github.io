@@ -33,7 +33,7 @@ SECTIONS = [
         field('authors', 'Authors — comma separated', 'textarea', True),
         field('doi', 'DOI (for citation lookup)'), field('bibtex', 'Publisher BibTeX', 'textarea'),
         field('note', 'Optional note', 'textarea'), field('selected', 'Mark as selected', 'checkbox'),
-        field('links', 'Paper links', 'records', fields=LINKS),
+        field('links', 'Paper links', 'records', fields=[field('label', 'Link label', required=True), field('url', 'URL or uploaded PDF', 'paperurl', True)]),
     ]),
     dict(key='teaching', label='Teaching', path=['teaching'], list=True, fields=[
         field('code', 'Course code', required=True), field('title', 'Course title', required=True),

@@ -125,6 +125,25 @@
     else $('content-form').append(text('p', 'Add an entry to start editing.', 'empty'));
     if (section.key === 'publications') renderFields($('student-authors'), draft.content.site, [{key:'student_authors',label:'Underlined student authors — one name per line',type:'lines'}]);
     if (section.key === 'publications' && record) {
+      const uploadLabel = text('label', '', 'field');
+      uploadLabel.append(text('span', 'Upload paper PDF (up to 10 MB)'));
+      const uploadPaper = document.createElement('input'); uploadPaper.type = 'file'; uploadPaper.accept = '.pdf,application/pdf'; uploadPaper.disabled = !local;
+      uploadPaper.addEventListener('change', async () => {
+        const file = uploadPaper.files[0]; if (!file) return;
+        if (file.size > 10 * 1024 * 1024) { notice('Paper PDF must be at most 10 MB.'); return; }
+        uploadPaper.disabled = true;
+        try {
+          const encoded = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+          const response = await fetch('/api/upload-paper', {method:'POST', headers:{'Content-Type':'application/json','X-Editor-Token':local.token}, body:JSON.stringify({base_revision:draft.base_revision, paper_id:record.id, data:encoded})});
+          const result = await response.json(); if (!response.ok) throw new Error(result.error);
+          record.links ||= [];
+          const existing = record.links.find(link => link.label.toLowerCase() === 'paper');
+          if (existing) existing.url = result.path; else record.links.unshift({label:'Paper', url:result.path});
+          changed(); renderForm(); notice('Paper PDF uploaded locally and linked. Preview, then Save or Publish to apply it.');
+        } catch (error) { report(error); } finally { uploadPaper.disabled = false; }
+      });
+      uploadLabel.append(uploadPaper, text('span', 'Replaces the Paper link; DOI and other links are preserved. Saved under assets/papers/.', 'field-hint'));
+      $('content-form').append(uploadLabel);
       const fetchBib = button('Fetch publisher BibTeX', async () => {
         fetchBib.disabled = true;
         try {
